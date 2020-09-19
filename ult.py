@@ -288,7 +288,6 @@ def test_background_color():
     img_ref = cv2.imread('template/ult_background_7.jpg', cv2.IMREAD_COLOR)
     img_ref_lab = cv2.cvtColor(img_ref, cv2.COLOR_BGR2Lab)
     mean_ref = (np.mean(img_ref_lab[:,:,0]), np.mean(img_ref_lab[:,:,1]), np.mean(img_ref_lab[:,:,2]))
-    # stf_ref = (np.std(img_ref_lab[:,:,0]), np.std(img_ref_lab[:,:,1]), np.std(img_ref_lab[:,:,2]))
     # cv2.imshow('ref', img_ref)
     # cv2.waitKey(0)
 
@@ -334,20 +333,33 @@ def test_read_ult():
     cv2.imshow('src', img_src)
     cv2.waitKey(0)
 
+def remove_spikes(ult, window_size):
+    i = 0
+    while(i+window_size < len(ult)):
+        delta_ult = ult[i+1:i+window_size]-ult[i:i+window_size-1]
+        change_total = np.sum(np.absolute(delta_ult))
+        change_net = np.absolute(np.sum(delta_ult))
+        if change_net < change_total*0.1:
+            ult[i+1:i+window_size-1] = (ult[i]+ult[i+window_size-1])/2
+        i += 1
 
-def find_invalid():
+def test_remove_spikes():
     with open('data_ults.json') as json_file:
         data = json.load(json_file)
 
-    player = 1
-    ult = data['ult'][str(player)]
+    for player in range(1,13):
+        ult_src = np.array(data['ult'][str(player)])
+        ult = ult_src.copy()
 
-    window_size = 3
+        remove_spikes(ult, 6)
+        plt.subplot(12,1,player)
+        plt.plot(ult_src)
+        plt.plot(ult)
 
-    for i in range(len(ult)-window_size):
-        pass
+    plt.show()
 
 # test_background_color()
 # test_read_ult()
 # save_match_ults()
-plot_match_ults()
+test_remove_spikes()
+# plot_match_ults()
