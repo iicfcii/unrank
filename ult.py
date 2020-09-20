@@ -14,10 +14,10 @@ ULT_DIGIT_1_TILT = 4
 ULT_DIGIT_1_MASK_1_X_OFFSET = 3
 ULT_DIGIT_1_MASK_7_X_OFFSET = 1
 ULT_DIGIT_1_MASK_POLY = np.array((ULT_DIGIT_1_LEFT,ULT_DIGIT_1_TOP,
-                                       ULT_DIGIT_1_LEFT+ULT_DIGIT_1_WIDTH,ULT_DIGIT_1_TOP,
-                                       ULT_DIGIT_1_LEFT+ULT_DIGIT_1_WIDTH-ULT_DIGIT_1_TILT,ULT_DIGIT_1_TOP+ULT_DIGIT_1_HEIGHT,
-                                       ULT_DIGIT_1_LEFT-ULT_DIGIT_1_TILT,ULT_DIGIT_1_TOP+ULT_DIGIT_1_HEIGHT),
-                                       dtype=np.float32).reshape((-1,2))
+                                  ULT_DIGIT_1_LEFT+ULT_DIGIT_1_WIDTH,ULT_DIGIT_1_TOP,
+                                  ULT_DIGIT_1_LEFT+ULT_DIGIT_1_WIDTH-ULT_DIGIT_1_TILT,ULT_DIGIT_1_TOP+ULT_DIGIT_1_HEIGHT,
+                                  ULT_DIGIT_1_LEFT-ULT_DIGIT_1_TILT,ULT_DIGIT_1_TOP+ULT_DIGIT_1_HEIGHT),
+                                  dtype=np.float32).reshape((-1,2))
 ULT_DIGIT_1_RECT = cv2.boundingRect(ULT_DIGIT_1_MASK_POLY)
 ULT_READY_RECT = (904,54,16,16)
 
@@ -331,7 +331,7 @@ def test_read_ult():
     cv2.waitKey(0)
 
 def test_remove_spikes():
-    with open('data_ults.json') as json_file:
+    with open('data.json') as json_file:
         data = json.load(json_file)
 
     for player in range(1,13):
@@ -376,7 +376,7 @@ def test_extract_ult():
 
 # test_bg()
 # test_read_ult()
-# save_match_ults()
+save_match_ults()
 # plot_match_ults()
-# test_remove_spikes()
-test_extract_ult()
+test_remove_spikes()
+# test_extract_ult()
