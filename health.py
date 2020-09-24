@@ -6,7 +6,7 @@ import time
 
 HEALTH_NUMBER_INDEX = [
     840,
-    3450,
+    11490,
     4200,
     3810,
     20100,
@@ -17,10 +17,10 @@ HEALTH_NUMBER_INDEX = [
     2400
 ]
 
-HEALTH_NUMBER_LEFT = 205
+HEALTH_NUMBER_LEFT = 204
 HEALTH_NUMBER_TOP = 605
-HEALTH_NUMBER_WIDTH = 7
-HEALTH_NUMBER_HEIGHT = 21
+HEALTH_NUMBER_WIDTH = 8
+HEALTH_NUMBER_HEIGHT = 20
 HEALTH_NUMBER_TILT = 5
 
 def number_mask_poly(x, y, w, h):
@@ -33,24 +33,24 @@ def number_mask_poly(x, y, w, h):
     return poly-np.tile(np.array([x, y], dtype=np.float32),(4,1))
 
 HEALTH_NUMBER_MASK_POLY = [
-    number_mask_poly(0, 0, 0, 0),
-    number_mask_poly(6, -3, 2, 0),
-    number_mask_poly(4, -1, 0, 0),
-    number_mask_poly(4, -10, 0, 0),
-    number_mask_poly(11, -1, 0, 0),
-    number_mask_poly(4, 1, 0, 0),
-    number_mask_poly(11, 0, 0, 0),
-    number_mask_poly(5, 1, 0, 0),
-    number_mask_poly(4, 1, 0, 0),
-    number_mask_poly(3, 1, 0, 0),
+    number_mask_poly(-1, -1, 0, 0),
+    number_mask_poly(3, -2, 4, 0),
+    number_mask_poly(3, -1, 0, 0),
+    number_mask_poly(3, -11, 0, 0),
+    number_mask_poly(10, -1, 0, 0),
+    number_mask_poly(4, 0, 0, 0),
+    number_mask_poly(10, 0, 0, 0),
+    number_mask_poly(4, 0, 1, 0),
+    number_mask_poly(3, 0, 0, 0),
+    number_mask_poly(3, 0, 0, 0),
 ]
 
 HEALTH_RECT = (175, 595, 42, 55)
 
-RATIO = 3
+RATIO = 4
 ALPHA = 1.5 # Scale
 BETA = -127*ALPHA+50 # Offset
-MATCH_THRESHOLD = 0.8
+MATCH_THRESHOLD = 0.9
 HEALTH_NUMBER_TOO_CLOSE_THRESHOLD = 7*RATIO
 
 def crop(img, rect):
@@ -73,21 +73,21 @@ def read_templates(ratio):
         rect = cv2.boundingRect(HEALTH_NUMBER_MASK_POLY[i])
         mask_poly_offset = HEALTH_NUMBER_MASK_POLY[i]-np.tile(rect[0:2],(4,1))
 
-        template = cv2.imread('template/health_number_'+str(i)+'.jpg', cv2.IMREAD_GRAYSCALE)
-        template = cv2.convertScaleAbs(template, alpha=ALPHA, beta=BETA)
-        # template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        template = cv2.imread('template/health_number_'+str(i)+'.jpg', cv2.IMREAD_COLOR)
 
         mask = np.zeros(template.shape[0:2], dtype=np.uint8)
         cv2.fillConvexPoly(mask, mask_poly_offset.astype(np.int32), (255,255,255))
-
-        template = cv2.resize(template, None, fx=ratio, fy=ratio)
         mask = cv2.resize(mask, None, fx=ratio, fy=ratio)
+
+        template = preprocess_image(template, ratio)
+        # template = cv2.resize(template, None, fx=ratio, fy=ratio)
+
         template[mask == 0] = 0
 
-        # cv2.imshow('template', template)
-        # cv2.imshow('mask', mask)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
+        cv2.imshow('template', template)
+        cv2.imshow('mask', mask)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
         templates[i] = (template, mask)
 
@@ -95,9 +95,10 @@ def read_templates(ratio):
 
 def read_health(img, health_rect, ratio, templates):
     img_cropped = crop(img, health_rect)
-    img_cropped = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2GRAY)
-    img_cropped = cv2.resize(img_cropped, None, fx=ratio, fy=ratio)
-    img_cropped = cv2.convertScaleAbs(img_cropped, alpha=ALPHA, beta=BETA)
+    img_cropped = preprocess_image(img_cropped, ratio)
+    # img_cropped = cv2.cvtColor(img_cropped, cv2.COLOR_BGR2GRAY)
+    # img_cropped = cv2.resize(img_cropped, None, fx=ratio, fy=ratio)
+    # img_cropped = cv2.convertScaleAbs(img_cropped, alpha=ALPHA, beta=BETA)
 
     match = []
     for number in range(10):
@@ -145,9 +146,9 @@ def read_health(img, health_rect, ratio, templates):
     else:
         health = -1
 
-    # print(match)
-    # cv2.imshow('img', img_cropped)
-    # cv2.waitKey(0)
+    print(match)
+    cv2.imshow('img', img_cropped)
+    cv2.waitKey(0)
 
     return health
 
@@ -157,7 +158,7 @@ def remove_spikes(ult, window_size):
         delta_ult = ult[i+1:i+window_size]-ult[i:i+window_size-1]
         change_total = np.sum(np.absolute(delta_ult))
         change_net = np.absolute(np.sum(delta_ult))
-        if change_net < change_total*0.1:
+        if change_net < change_total*0.2:
             ult[i+1:i+window_size-1] = (ult[i]+ult[i+window_size-1])/2
         i += 1
 
@@ -166,7 +167,10 @@ def test_read_health():
     templates = read_templates(RATIO)
 
     data = []
-    for i in range(0, 732):
+    start = 350
+    end = 400
+    t = np.arange(start,end)
+    for i in range(start, end):
         t0 = time.time()
         img = cv2.imread('img/overwatch_1_1_'+str(i*30)+'.jpg', cv2.IMREAD_COLOR)
         t1 = time.time()
@@ -181,8 +185,8 @@ def test_read_health():
     data = np.array(data)
     data_adjusted = data.copy()
     remove_spikes(data_adjusted, 5)
-    plt.plot(data)
-    plt.plot(data_adjusted)
+    plt.plot(t, data)
+    plt.plot(t, data_adjusted)
     plt.show()
 
 def test_hls():
@@ -205,6 +209,70 @@ def test_hls():
         cv2.imshow('gray', img_gray)
         cv2.waitKey(0)
 
+def preprocess_image(img, ratio):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.resize(img, None, fx=ratio, fy=ratio)
+    img = cv2.convertScaleAbs(img, alpha=ALPHA, beta=BETA)
+    img = cv2.medianBlur(img, 3)
+    # img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,21,6)
 
-test_hls()
+    return img
+
+def test_preprocess():
+    for i in range(40, 732):
+        # print(i)
+        img = cv2.imread('img/overwatch_1_1_'+str(i*30)+'.jpg', cv2.IMREAD_COLOR)
+        img = crop(img, HEALTH_RECT)
+        img = preprocess_image(img, RATIO)
+
+        cv2.imshow('gray', img)
+        cv2.waitKey(0)
+
+def test_edge():
+    num_width = 15
+    num_height = 8
+
+    for j in range(0,int(732/num_width/num_height)):
+        imgs = []
+        for i in range(j*num_width*num_height, j*num_width*num_height+num_width*num_height):
+            img = cv2.imread('img/overwatch_1_1_'+str(i*30)+'.jpg', cv2.IMREAD_COLOR)
+            img = crop(img, HEALTH_RECT)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            img = cv2.resize(img, None, fx=2, fy=2)
+            img = cv2.convertScaleAbs(img, alpha=ALPHA, beta=BETA)
+            img = cv2.GaussianBlur(img, (5, 5), 5)
+
+            img = cv2.Canny(img,100,200)
+            # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(2,2)), iterations=1)
+            img = cv2.morphologyEx(img, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT,(3,3)), iterations=1)
+
+            contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+            # img = np.zeros((img.shape[0],img.shape[1],3))
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                if area < 100: continue
+                img = cv2.polylines(img, [contour], True, (255,0,0))
+            img = cv2.putText(img, str(i*30), (0,img.shape[0]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255))
+            imgs.append(img)
+
+            print(len(contours), i*30)
+
+            # cv2.imshow('gray', img)
+            # cv2.imshow('edges', edges)
+            # cv2.waitKey(0)
+
+        imgs_row = []
+        for i in range(num_height):
+            imgs_row.append(cv2.hconcat(imgs[i*num_width:i*num_width+num_width], num_width))
+
+        img_final = cv2.vconcat(imgs_row, num_height)
+        cv2.imshow('edges', img_final)
+        cv2.waitKey(0)
+
+# test_hls()
 # test_read_health()
+# test_preprocess()
+# read_templates(RATIO)
+test_edge()
