@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import json
 import time
 
-HEALTH_RECT = (170, 540, 170, 115)
+RATIO = 2
+
+HEALTH_RECT = (160, 590, 100, 60)
 HEALTH_NUMBER_WIDTH = 45
 HEALTH_NUMBER_HEIGHT = 30
 
@@ -46,13 +48,9 @@ def crop(img, rect):
     img_crop = img[y:y+h,x:x+w]
     return img_crop
 
-def process(img):
-    if img is None: return None
-
-    img_src = crop(img, HEALTH_RECT)
-
+def locate_health(img):
     # Match color
-    img = cv2.cvtColor(img_src, cv2.COLOR_BGR2HSV)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     img = cv2.GaussianBlur(img,(3,3),0)
 
     mask = cv2.inRange(img, lb, ub) # Black and white mask
@@ -74,16 +72,39 @@ def process(img):
     # Remove spikes on contours
     img = cv2.morphologyEx(img, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT,(3,3)), iterations=10)
 
+    # Calculate bounding box
     x, y, w, h = cv2.boundingRect(img)
     if w == 0  or h == 0: return None
-
     rect_health = (x-15, y+h+2, HEALTH_NUMBER_WIDTH, HEALTH_NUMBER_HEIGHT)
 
-    img = crop(img_src, rect_health)
-    if img.shape[0] != HEALTH_NUMBER_HEIGHT or img.shape[1] != HEALTH_NUMBER_WIDTH: return None
+    return rect_health
+
+def process(img):
+    if img is None: return None
+
+    img = crop(img, HEALTH_RECT)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img = cv2.bilateralFilter(img,7,100,100)
+    # img = cv2.GaussianBlur(img,(5,5),0)
+
+    # img = cv2.Canny(img,100,200)
+    # img = cv2.bilateralFilter(img,7,100,100)
+    # img = cv2.GaussianBlur(img,(3, 3),0)
+    # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT,(2,2)), iterations=1)
+
+
+    rect_health = locate_health(img)
+    if rect_health is None: return None
 
     # img = cv2.rectangle(img_src, rect_health, 255)
+    img = crop(img, rect_health)
+    if img.shape[0] != HEALTH_NUMBER_HEIGHT or img.shape[1] != HEALTH_NUMBER_WIDTH: return None
 
+    # img = cv2.bilateralFilter(img,9,100,100)
+    # # img = cv2.GaussianBlur(img,(3,3),0)
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img = cv2.resize(img, None, fx=RATIO, fy=RATIO)
+    # img = cv2.Canny(img,10,100)
     return img
 
 def process_batch(num_width=15, num_height=8):
@@ -96,7 +117,7 @@ def process_batch(num_width=15, num_height=8):
             if img is None:
                 img = np.zeros((HEALTH_NUMBER_HEIGHT, HEALTH_NUMBER_WIDTH, 3), dtype=np.uint8)
 
-            img = cv2.putText(img, str(j*30), (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,0,0))
+            # img = cv2.putText(img, str(j*30), (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,0,0))
             imgs.append(img)
 
         imgs_row = []
@@ -105,6 +126,7 @@ def process_batch(num_width=15, num_height=8):
 
         img_final = cv2.vconcat(imgs_row, num_height)
         cv2.imshow('edges', img_final)
+        cv2.imwrite('test.jpg', img_final)
         cv2.waitKey(0)
 
 # print(cv2.cvtColor(np.array([[[210,42,29]]], dtype=np.uint8), cv2.COLOR_RGB2HSV))
