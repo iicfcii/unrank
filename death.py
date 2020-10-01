@@ -48,7 +48,7 @@ def read_elim_rects():
 
     return elim_rects
 
-def save_elim_template():
+def save_elim_templates():
     elim_rects = read_elim_rects()
     img = cv2.imread('img/overwatch_1_1_3060.jpg', cv2.IMREAD_COLOR)
     img_mark = cv2.rectangle(img.copy(), elim_rects[3], (255,255,255), thickness=1)
@@ -166,6 +166,32 @@ def plot_match_elims():
         plt.plot(data['elims'][str(i)])
     plt.show()
 
+def remove_spikes(ult, window_size):
+    i = 0
+    while(i+window_size < len(ult)):
+        delta_ult = ult[i+1:i+window_size]-ult[i:i+window_size-1]
+        change_total = np.sum(np.absolute(delta_ult))
+        change_net = np.absolute(np.sum(delta_ult))
+        # Only detect downward spike
+        if change_net < change_total*0.1 and ult[i] != 0:
+            ult[i+1:i+window_size-1] = (ult[i]+ult[i+window_size-1])/2
+        i += 1
+
+def test_remove_spikes():
+    with open('data.json') as json_file:
+        data = json.load(json_file)
+
+    for player in range(1,13):
+        ult_src = np.array(data['elims'][str(player)])
+        ult = ult_src.copy()
+
+        remove_spikes(ult, 3)
+        plt.subplot(12,1,player)
+        plt.plot(ult_src)
+        plt.plot(ult)
+
+    plt.show()
+
 def read_batch(num_width=15, num_height=8):
     templates = read_elim_templates()
     elim_rects = read_elim_rects()
@@ -194,9 +220,10 @@ def read_batch(num_width=15, num_height=8):
         cv2.waitKey(0)
 
 
-# save_elim_template()
+# save_elim_templates()
 # templates = read_elim_templates()
 # elim_rects = read_elim_rects()
-save_match_elims()
-plot_match_elims()
+# save_match_elims()
+# plot_match_elims()
+test_remove_spikes()
 # read_batch(num_width=20, num_height=20)
