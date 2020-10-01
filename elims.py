@@ -30,6 +30,16 @@ ELIMS_RECT = (910,110,350,175)
 RATIO = 1.5 # Scale image to make threshold clearer
 MATCH_THRESHOLD = 0.9
 
+# NOTE: may need to tune
+TEAM_1_COLOR = np.array((103, 145, 229)) #HSV
+TEAM_1_COLOR_RANGE = np.array((20, 100, 100))
+TEAM_1_COLOR_LB = TEAM_1_COLOR-TEAM_1_COLOR_RANGE
+TEAM_1_COLOR_UB = TEAM_1_COLOR+TEAM_1_COLOR_RANGE
+
+TEAM_2_COLOR = np.array((172, 191, 164)) #HSV
+TEAM_2_COLOR_RANGE = np.array((20, 100, 100))
+TEAM_2_COLOR_LB = TEAM_2_COLOR-TEAM_2_COLOR_RANGE
+TEAM_2_COLOR_UB = TEAM_2_COLOR+TEAM_2_COLOR_RANGE
 
 def crop(img, rect):
     x, y, w, h = rect
@@ -41,6 +51,24 @@ def crop(img, rect):
 
     img_crop = img[y:y+h,x:x+w]
     return img_crop
+
+def match_color(img, lb, ub):
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img_bin = np.zeros((img.shape[0],img.shape[1],1), dtype=np.uint8)
+
+    if ub[0] > 180: # Red is across 180
+        h_match = np.logical_or(img_hsv[:,:,0] > lb[0], img_hsv[:,:,0] < ub[0]-180)
+    elif lb[0] < 0:
+        h_match = np.logical_or(img_hsv[:,:,0] > lb[0]+180, img_hsv[:,:,0] < ub[0])
+    else:
+        h_match = np.logical_and(img_hsv[:,:,0] > lb[0], img_hsv[:,:,0] < ub[0])
+
+    s_match = np.logical_and(img_hsv[:,:,1] > lb[1], img_hsv[:,:,1] < ub[1])
+    v_match = np.logical_and(img_hsv[:,:,2] > lb[2], img_hsv[:,:,2] < ub[2])
+
+    img_bin[np.all((h_match, s_match, v_match), axis=0)] = 255
+
+    return img_bin
 
 def save_elim_templates():
     w = 20
@@ -126,28 +154,47 @@ def extract_location(res):
 def read_elim(img, templates):
     t0 = time.time()
 
-    img = crop(img, ELIMS_RECT)
-    img = cv2.resize(img, None, fx=RATIO, fy=RATIO)
-
-    h, w = templates['moira'].shape[0:2]
+    img_src = crop(img, ELIMS_RECT)
+    img = cv2.resize(img_src, None, fx=RATIO, fy=RATIO)
 
     for hero in templates:
         res = cv2.matchTemplate(img, templates[hero], cv2.TM_CCOEFF_NORMED)
         locations = extract_location(res)
         for l in locations:
-            print(l)
-            img = cv2.rectangle(img, (l[0],l[1],w,h), (255,255,255), thickness=2)
+            # Determine team by making sure image include border
+            # And match team colors
+            b = 3
+            h = 29
+            rect = np.array((l[0]/RATIO,l[1]/RATIO-7,templates[hero].shape[1]/RATIO,h),dtype=np.int32)
+            img_border = crop(img_src, rect).copy()
+            img_border[b:h-b,:] = (0,0,0)
+
+            img_1 = match_color(img_border, TEAM_1_COLOR_LB, TEAM_1_COLOR_UB)
+            img_2 = match_color(img_border, TEAM_2_COLOR_LB, TEAM_2_COLOR_UB)
+            team = np.argmax([np.sum(img_1),np.sum(img_2)])+1
+
+            # print(team)
+            # cv2.imshow('1', img_1)
+            # cv2.imshow('2', img_2)
+            # cv2.waitKey(0)
+
+            print(l, hero, team)
+            rect_template = np.array((l[0]/RATIO,l[1]/RATIO,templates[hero].shape[1]/RATIO,templates[hero].shape[0]/RATIO), dtype=np.int32)
+            if team == 1:
+                cv2.rectangle(img_src, rect_template, (255,0,0), thickness=2)
+            else:
+                cv2.rectangle(img_src, rect_template, (0,0,255), thickness=2)
+
 
     t1 = time.time()
-    # print(t1-t0)
+    print(t1-t0)
 
-    img = cv2.resize(img, None, fx=1/RATIO, fy=1/RATIO)
-    return img
+    return img_src
 
 def read_batch(num_width=5, num_height=5):
     templates = read_elim_from_hero_templates()
 
-    for i in range(28,int(732/num_width/num_height)+1):
+    for i in range(0,int(732/num_width/num_height)+1):
         imgs = []
         for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
             img = cv2.imread('img/overwatch_1_1_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
@@ -175,5 +222,8 @@ def read_batch(num_width=5, num_height=5):
 
 # img = cv2.imread('img/overwatch_1_1_20700.jpg', cv2.IMREAD_COLOR)
 # img = read_elim(img, templates)
+
+# print(cv2.cvtColor(np.array([[[99,171,229]]], dtype=np.uint8), cv2.COLOR_RGB2HSV))
+# print(cv2.cvtColor(np.array([[[164,41,72]]], dtype=np.uint8), cv2.COLOR_RGB2HSV))
 
 read_batch()
