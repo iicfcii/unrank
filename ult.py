@@ -221,7 +221,7 @@ def read_match_ults(start, end):
     for i in range(start, end):
         index = i*30
         # NOTE: Read image takes long time
-        img = cv2.imread('img/overwatch_1_1_'+str(index)+'.jpg', cv2.IMREAD_COLOR)
+        img = cv2.imread('img/anubis/anubis_'+str(index)+'.jpg', cv2.IMREAD_COLOR)
         ults = read_ults(img, ult_rects, RATIO, templates)
 
         for key in ults:
@@ -233,7 +233,7 @@ def read_match_ults(start, end):
     return data
 
 def save_match_ults():
-    data = read_match_ults(0, 732)
+    data = read_match_ults(0, 1033)
 
     with open('data.json', 'w') as outfile:
         json.dump(data, outfile)
@@ -376,7 +376,7 @@ def test_extract_ult():
 
 # test_bg()
 # test_read_ult()
-# save_match_ults()
+save_match_ults()
 # plot_match_ults()
 test_remove_spikes()
 # test_extract_ult()

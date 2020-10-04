@@ -8,21 +8,35 @@ HEROES = [
     'ana',
     'ashe',
     'baptiste',
+    'bastion',
+    'brigitte',
     'doomfist',
     'dva',
+    'echo',
     'genji',
+    'hanzo',
     'junkrat',
+    'lucio',
     'mccree',
     'mei',
     'mercy',
     'moira',
+    'orisa',
+    'pharah',
+    'reaper',
     'reinhardt',
     'roadhog',
+    'sigma',
     'soldier76',
+    'sombra',
+    'symmetra',
+    'torbjorn',
     'tracer',
     'widowmaker',
+    'winston',
     'wreckingball',
     'zarya',
+    'zenyatta',
 ]
 
 ELIMS_RECT = (910,110,350,175)
@@ -197,7 +211,7 @@ def read_batch(num_width=5, num_height=5):
     for i in range(0,int(732/num_width/num_height)+1):
         imgs = []
         for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
-            img = cv2.imread('img/overwatch_1_1_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
+            img = cv2.imread('img/anubis/anubis_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
             if img is None:
                 img = np.zeros((ELIMS_RECT[3], ELIMS_RECT[2], 3), dtype=np.uint8)
                 elim = 0

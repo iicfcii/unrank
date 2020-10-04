@@ -1,6 +1,7 @@
 import cv2
 
-vidName = 'overwatch_1_1'
+# NOTE: Manually create folder first
+vidName = 'anubis'
 vid = cv2.VideoCapture('vid/'+vidName+'.mp4')
 
 fps = int(vid.get(cv2.CAP_PROP_FPS))
@@ -15,7 +16,7 @@ while True:
 
     if ret:
         if frame_count%(fps/1) == 0: # 1 image per second
-            imgName = 'img/'+vidName+'_'+str(frame_count)+'.jpg'
+            imgName = 'img/'+vidName+'/'+vidName+'_'+str(frame_count)+'.jpg'
             print(imgName)
             cv2.imwrite(imgName, frame);
         frame_count = frame_count + 1
