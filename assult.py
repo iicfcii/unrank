@@ -9,20 +9,26 @@ from utils import crop, match_color
 PROGRESS_RECT_1 = (592,71,46,46)
 PROGRESS_RECT_2 = (642,71,46,46)
 
-ICON_CENTER = (int(PROGRESS_RECT_1[2]/2-1), int(PROGRESS_RECT_1[3]/2-1))
-ICON_RECT_1 = (602,81,26,26)
-ICON_RECT_2 = (652,81,26,26)
+ICON_CENTER = (int(PROGRESS_RECT_1[2]/2), int(PROGRESS_RECT_1[3]/2))
+ICON_RECT_1 = (601,81,26,26)
+ICON_RECT_2 = (651,81,26,26)
+ICON_RECT_OFFSET = (ICON_RECT_1[0]-PROGRESS_RECT_1[0], ICON_RECT_1[1]-PROGRESS_RECT_1[1])
 ICON_MASK = np.array([[ICON_RECT_1[2]/2-1, 2],
                       [ICON_RECT_1[2]-3, ICON_RECT_1[3]/2],
                       [ICON_RECT_1[2]/2-1, ICON_RECT_1[3]-2],
                       [1, ICON_RECT_1[3]/2]], dtype=np.int32)
-ICON_THRESHOLD = 0.7
+ICON_THRESHOLD = 0.4 # NOTE: A,B icon change size a bit when point is contesting
 
 
-TEAM1_COLOR = np.array((90.0, 150.0, 255)) # HSV, RGB 67, 212, 255
-TEAM1_COLOR_RANGE = np.array((15.0, 120, 40))
+TEAM1_COLOR = np.array((85.0, 150.0, 255)) # HSV, RGB 67, 212, 255
+TEAM1_COLOR_RANGE = np.array((20.0, 120, 40))
 TEAM1_COLOR_LB = TEAM1_COLOR-TEAM1_COLOR_RANGE
 TEAM1_COLOR_UB = TEAM1_COLOR+TEAM1_COLOR_RANGE
+
+TEAM2_COLOR = np.array((170.0, 180, 230)) # HSV, RGB 240, 14, 54
+TEAM2_COLOR_RANGE = np.array((20.0, 120, 40))
+TEAM2_COLOR_LB = TEAM2_COLOR-TEAM2_COLOR_RANGE
+TEAM2_COLOR_UB = TEAM2_COLOR+TEAM2_COLOR_RANGE
 
 def save_assult_templates():
     img = cv2.imread('img/hanamura/hanamura_660.jpg', cv2.IMREAD_COLOR)
@@ -34,7 +40,7 @@ def save_assult_templates():
     img = cv2.imread('img/hanamura/hanamura_3240.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_A1.jpg', crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_12570.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('img/hanamura/hanamura_12060.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_A2.jpg', crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
@@ -101,62 +107,75 @@ def read_point_status(img, templates, point):
     scores = []
     template, mask = templates['locked']
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
-    scores.append((-1, np.max(res)))
+    loc = np.unravel_index(np.argmax(res), res.shape)
+    scores.append((-1, None, loc, res[loc]))
 
     template, mask = templates['captured']
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
-    scores.append((100, np.max(res)))
+    loc = np.unravel_index(np.argmax(res), res.shape)
+    scores.append((100, None, loc, res[loc]))
 
     template, mask = templates[point+'1']
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
-    scores.append((0, np.max(res)))
+    loc = np.unravel_index(np.argmax(res), res.shape)
+    scores.append((0, 2, loc, res[loc])) # attacker team is 2
 
     template, mask = templates[point+'2']
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
-    scores.append((0, np.max(res)))
+    loc = np.unravel_index(np.argmax(res), res.shape)
+    scores.append((0, 1, loc, res[loc])) # attacker team is 1
 
-    scores.sort(reverse=True, key=lambda m:m[1])
-
-    if scores[0][1] > ICON_THRESHOLD:
-        return scores[0][0]
+    scores.sort(reverse=True, key=lambda m:m[3])
+    print(scores)
+    if scores[0][3] > ICON_THRESHOLD:
+        return scores[0][0],scores[0][1],(scores[0][2][1],scores[0][2][0])
     else:
-        return None
+        return None, None, None
 
 def read_progress(img, templates):
-    progress = {'A': -1, 'B': -1}
+    progress = {'A': -1, 'B': -1, 'attacker': None}
     # Match point status(locked, captured)
-    progress['A'] = read_point_status(img, templates, 'A')
-    progress['B'] = read_point_status(img, templates, 'B')
+    progress['A'], attacking_A, loc_A = read_point_status(img, templates, 'A')
+    progress['B'], attacking_B, loc_B = read_point_status(img, templates, 'B')
 
-    imgs = {
-        'A':crop(img, PROGRESS_RECT_1),
-        'B':crop(img, PROGRESS_RECT_2),
-    }
+    if progress['A'] is not None and progress['A'] == 0:
+        progress['attacker'] = attacking_A
+    if progress['B'] is not None and progress['B'] == 0:
+        progress['attacker'] = attacking_B
 
+    imgs = {'A':crop(img, PROGRESS_RECT_1), 'B':crop(img, PROGRESS_RECT_2)}
     img_both = cv2.hconcat([imgs['A'], imgs['B']], 2)
+
     if progress['A'] is None or progress['B'] is None:
         return progress, img_both
 
-    if progress['A'] > -1 and progress['B'] == -1:
+    # Check which point to read
+    if progress['A'] == 0 and progress['B'] == -1:
         point_current = 'A'
-    elif progress['A'] == 100 and progress['B'] > -1:
+        loc = loc_A
+    elif progress['A'] == 100 and progress['B'] == 0:
         point_current = 'B'
+        loc = loc_B
     else:
         return progress, img_both
-
+    center = (ICON_CENTER[0], ICON_CENTER[1]+loc[1]-ICON_RECT_OFFSET[1]) # Overtime will offset in y direction
     img_current = imgs[point_current].copy()
     mask= np.zeros((img_current.shape[0],img_current.shape[1]), dtype=np.uint8)
-    mask = cv2.circle(mask, ICON_CENTER, 16, 255, thickness=4)
+    mask = cv2.circle(mask, center, 16, 255, thickness=4)
     img_current[mask == 0] = (0,0,0)
-    img_current = match_color(img_current, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
-    # img_bin = cv2.morphologyEx(img_bin, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(4,4)), iterations=1, borderValue=0)
+
+    if progress['attacker'] == 1:
+        img_match = match_color(img_current, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
+    else:
+        img_match = match_color(img_current, TEAM2_COLOR_LB, TEAM2_COLOR_UB)
+    img_match = cv2.morphologyEx(img_match, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,2)), iterations=1, borderValue=0)
 
     # Convert all valid pixles to angle
-    pts = np.transpose(np.array((img_current > 0).nonzero()))
+    pts = np.transpose(np.array((img_match > 0).nonzero()))
     pts[:,[0,1]] = pts[:,[1,0]] # Swap so that pt=(x,y)
     # Calculate angle using atan2(y,x)
     # bottom to top is x, left to right is y
-    theta = np.arctan2(pts[:,0]-ICON_CENTER[0], -(pts[:,1]-ICON_CENTER[1]))
+    theta = np.arctan2(pts[:,0]-center[0], -(pts[:,1]-center[1]))
     # Convert to 0-2pi
     theta[theta < 0] += 2*np.pi
     # Sort and covnert to degrees
@@ -164,15 +183,27 @@ def read_progress(img, templates):
     if theta.shape[0] > 1:
         # Use average delta theta and initial angle to filter miss match
         dtheta = theta[1:]-theta[0:-1]
+        print(np.mean(dtheta))
         if np.mean(dtheta) < 5 and theta[0] < 15:
-            progress[point_current] = int(theta[-1]/360*100)
+            start = -1
+            indices = (dtheta > 10).nonzero()[0] # If big gap, use value before gap
+            if len(indices) > 0:
+                start = indices[0]
+            progress[point_current] = int(theta[start]/360*100)
+
+    img_current[img_match > 0] = (255,0,0)
+    img_none = np.zeros((img_current.shape[0],img_current.shape[1], 3),dtype=np.uint8)
+    if point_current == 'A':
+        return progress, cv2.hconcat([img_current, img_none], 2)
+    else:
+        return progress, cv2.hconcat([img_none, img_current], 2)
 
     return progress, img_both
 
-def read_batch(num_width=8, num_height=8):
+def read_batch(num_width=8, num_height=16):
     templates = read_assult_tempaltes()
 
-    for i in range(9,int(1623/num_width/num_height)+1):
+    for i in range(0,int(1623/num_width/num_height)+1):
         imgs = []
         for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
             img = cv2.imread('img/hanamura/hanamura_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
@@ -180,11 +211,13 @@ def read_batch(num_width=8, num_height=8):
                 img = np.zeros((PROGRESS_RECT_1[3]*2, PROGRESS_RECT_1[2]*2, 3), dtype=np.uint8)
                 elim = 0
             else:
-                # print(j*30)
+                print(j*30)
                 progress, img = read_progress(img, templates)
 
-            if j < 1623: img = cv2.putText(img, str(progress['A'])+' '+str(progress['B']), (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
-            # if j < 1623: img = cv2.putText(img, str(j*30), (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+            info = str(progress['A'])+' '+str(progress['B'])+' '+str(progress['attacker'])
+            if j < 1623:
+                img = cv2.putText(img, info, (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+                img = cv2.putText(img, str(j*30), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
             imgs.append(img)
 
         imgs_row = []
@@ -195,6 +228,6 @@ def read_batch(num_width=8, num_height=8):
         cv2.imshow('read', img_final)
         cv2.waitKey(0)
 
-# save_assult_templates()
+save_assult_templates()
 # read_assult_tempaltes()
 read_batch()
