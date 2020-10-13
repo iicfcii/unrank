@@ -27,3 +27,29 @@ def match_color(img, lb, ub):
     img_bin[np.all((h_match, s_match, v_match), axis=0)] = 255
 
     return img_bin
+
+def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
+    shape = None
+    for i in range(start,int(length/num_width/num_height)+1):
+        imgs = []
+        for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
+            img = cv2.imread('img/'+map+'/'+map+'_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
+            if img is None:
+                img = np.zeros(shape, dtype=np.uint8)
+            else:
+                print(j*30)
+                info, img = process(img)
+                shape = img.shape
+
+            if j < length:
+                img = cv2.putText(img, info, (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+                img = cv2.putText(img, str(j*30), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+            imgs.append(img)
+
+        imgs_row = []
+        for i in range(num_height):
+            imgs_row.append(cv2.hconcat(imgs[i*num_width:i*num_width+num_width], num_width))
+
+        img_final = cv2.vconcat(imgs_row, num_height)
+        cv2.imshow('read', img_final)
+        cv2.waitKey(0)

@@ -126,7 +126,7 @@ def read_point_status(img, templates, point):
     scores.append((0, 1, loc, res[loc])) # attacker team is 1
 
     scores.sort(reverse=True, key=lambda m:m[3])
-    print(scores)
+
     if scores[0][3] > ICON_THRESHOLD:
         return scores[0][0],scores[0][1],(scores[0][2][1],scores[0][2][0])
     else:
@@ -183,10 +183,11 @@ def read_progress(img, templates):
     if theta.shape[0] > 1:
         # Use average delta theta and initial angle to filter miss match
         dtheta = theta[1:]-theta[0:-1]
-        print(np.mean(dtheta))
+
+        # Mean of dtheta indicates the scatterness of data
         if np.mean(dtheta) < 5 and theta[0] < 15:
             start = -1
-            indices = (dtheta > 10).nonzero()[0] # If big gap, use value before gap
+            indices = (dtheta > 20).nonzero()[0] # If big gap, use value before gap
             if len(indices) > 0:
                 start = indices[0]
             progress[point_current] = int(theta[start]/360*100)
