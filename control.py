@@ -8,58 +8,34 @@ LOCKED_RECT = (626,80,28,28)
 UNLOCKED_RECT = (625,58,30,30)
 STATUS_THRESHOLD = 0.5
 
-RATIO = 2
+RATIO = 2.0
 PERCENT_SYMBOL_1_RECT = (585,64,13,17)
 PERCENT_SYMBOL_2_RECT = (690,64,13,17)
 PERCENT_0_1_RECT = (577,64,8,17)
 PERCENT_0_2_RECT = (682,64,8,17)
+PERCENT_TILT_X = 4
+PERCENT_TILT_Y = 8
+PERCENT_0_MASK = np.array([
+    [PERCENT_TILT_X, 0],
+    [PERCENT_0_1_RECT[2]-1, 0],
+    [PERCENT_0_1_RECT[2]-1, PERCENT_0_1_RECT[3]-1],
+    [0, PERCENT_0_1_RECT[3]-1],
+    [0, PERCENT_TILT_Y],
+], dtype=np.int32)
 PERCENT_1_1_RECT = (578,64,6,17)
 PERCENT_1_2_RECT = (683,64,6,17)
 PERCENT_RECTS = {
-    0: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    1: {
-        1: PERCENT_1_1_RECT,
-        2: PERCENT_1_2_RECT,
-    },
-    2: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    3: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    4: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    5: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    6: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    7: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    8: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    9: {
-        1: PERCENT_0_1_RECT,
-        2: PERCENT_0_2_RECT,
-    },
-    'symbol': {
-        1: PERCENT_SYMBOL_1_RECT,
-        2: PERCENT_SYMBOL_2_RECT,
-    }
+    0: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    1: {1: PERCENT_1_1_RECT, 2: PERCENT_1_2_RECT},
+    2: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    3: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    4: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    5: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    6: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    7: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    8: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    9: {1: PERCENT_0_1_RECT, 2: PERCENT_0_2_RECT},
+    'symbol': {1: PERCENT_SYMBOL_1_RECT, 2: PERCENT_SYMBOL_2_RECT}
 }
 PERCENT_THRESHOLD = 0.5
 
@@ -149,6 +125,14 @@ def read_tempaltes():
     mask_unlocked = np.zeros((UNLOCKED_RECT[3],UNLOCKED_RECT[2]), dtype=np.uint8)
     mask_unlocked = cv2.circle(mask_unlocked, center, 14, 255, thickness=-1)
 
+    mask_percent_0 = np.zeros((PERCENT_0_1_RECT[3],PERCENT_0_1_RECT[2]), dtype=np.uint8)
+    mask_percent_0 = cv2.fillConvexPoly(mask_percent_0, PERCENT_0_MASK, 255)
+    mask_percent_0 = cv2.resize(mask_percent_0, None, fx=RATIO, fy=RATIO)
+
+    mask_percent_1 = np.zeros((PERCENT_1_1_RECT[3],PERCENT_1_1_RECT[2]), dtype=np.uint8)
+    mask_percent_1 = cv2.resize(mask_percent_1, None, fx=RATIO, fy=RATIO)
+    mask_percent_1[:,:] = 255
+
     # Status
     for map in ['a', 'b', 'c']:
         templates[map] = {}
@@ -161,8 +145,15 @@ def read_tempaltes():
         templates[num] = {}
         for t in range(1,3):
             img_num = cv2.imread('template/control_'+str(num)+'_'+str(t)+'.jpg', cv2.IMREAD_COLOR)
-            img_num = cv2.resize(img_num, None, fx=RATIO, fy=RATIO, interpolation=cv2.INTER_LINEAR)
-            templates[num][t] = (img_num, None)
+            img_num = cv2.resize(img_num, None, fx=RATIO, fy=RATIO)
+
+            if num == 1:
+                mask = mask_percent_1
+            else:
+                mask = mask_percent_0
+
+            templates[num][t] = (img_num, mask)
+
 
     # Symbol
     templates['symbol'] = {}
@@ -170,7 +161,9 @@ def read_tempaltes():
         img_sym = cv2.imread('template/control_symbol_'+str(t)+'.jpg', cv2.IMREAD_COLOR)
         templates['symbol'][t] = (img_sym, None)
 
-    # cv2.imshow('temp', templates[3][2][0])
+    # temp, mask = templates[7][2]
+    # temp[mask == 0] = (0,0,0)
+    # cv2.imshow('temp', temp)
     # cv2.waitKey(0)
 
     return templates
@@ -244,7 +237,7 @@ def read_progress(src, templates):
         digit_1_rect = (t_progress_rect[0]+dx-w_digit_1-padx, t_progress_rect[1], w_digit_1+padx*2, t_progress_rect[3])
         img_digit_1 = crop(src, digit_1_rect)
         img_digit_1_scaled = cv2.resize(img_digit_1, None, fx=RATIO, fy=RATIO)
-        res = cv2.matchTemplate(img_digit_1_scaled, template, cv2.TM_CCOEFF_NORMED)
+        res = cv2.matchTemplate(img_digit_1_scaled, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_1_scores.append((num, np.max(res)))
     digit_1_scores.sort(reverse=True, key=lambda s:s[1])
     digit_1 = digit_1_scores[0][0]
@@ -257,14 +250,14 @@ def read_progress(src, templates):
         w_digit_1 = PERCENT_RECTS[digit_1][state][2]
         digit_2_rect = (t_progress_rect[0]+dx-w_digit_2-w_digit_1-padx+1, t_progress_rect[1], w_digit_2+padx*2, t_progress_rect[3])
         img_digit_2 = crop(src, digit_2_rect)
-        img_digit_2_scaled = cv2.resize(img_digit_2, None, fx=RATIO, fy=RATIO, interpolation=cv2.INTER_LINEAR)
-        res = cv2.matchTemplate(img_digit_2_scaled, template, cv2.TM_CCOEFF_NORMED)
+        img_digit_2_scaled = cv2.resize(img_digit_2, None, fx=RATIO, fy=RATIO)
+        res = cv2.matchTemplate(img_digit_2_scaled, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_2_scores.append((num, np.max(res)))
     digit_2_scores.sort(reverse=True, key=lambda s:s[1])
     digit_2 = digit_2_scores[0][0]
     if digit_2_scores[0][1] < PERCENT_THRESHOLD: digit_2 = 0
 
-    # print(digit_1_scores)
+    print(digit_1_scores)
     # print(digit_2_scores)
 
     # Prepare visual representation
@@ -294,8 +287,8 @@ def process_status(img):
 def process_progress(img):
     return read_progress(img, templates)
 
-save_templates()
+# save_templates()
 # tempaltes = read_tempaltes()
 
 # read_batch(process_status, start=4)
-read_batch(process_progress, start=4)
+read_batch(process_progress, start=2, num_height=16)
