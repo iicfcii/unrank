@@ -268,7 +268,6 @@ def read_progress(src, templates):
     percent = digit_2*10+digit_1
 
     # Prepare visual representation
-    # img_full_progress = crop(src, full_progress_rect)
     # img_full_progress[:,:] = (0,0,0)
     # img_rect = digit_1_rect
     # dx = img_rect[0]-full_progress_rect[0]
