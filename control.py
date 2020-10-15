@@ -192,19 +192,25 @@ def read_point_status(img, templates):
     else:
         return None, None, None
 
+# None, None, None: if no progress UI detected
+# None -1, None: if point is locked
+# map, 0, 0: if point is unlocked but not captured.
+# map, 1, percent: if point is captured by team 1.
+# map, 2, percent: if point is captured by team 2.
 def read_progress(src, templates):
     state, map, loc = read_point_status(src, templates)
 
     img_full_progress = crop(src, FULL_PROGRESS_RECT)
-    if state is None: return 'NA', img_full_progress
-    if state == -1: return '{:d}'.format(state), img_full_progress
-    if state == 0: return '{}{:d}'.format(map, state), img_full_progress
+    if state is None: return None, None, None
+    if state == -1: return None, -1, None
+    if state == 0: return map, 0, 0
 
     if state == 1:
         t_progress_rect = list(T1_PROGRESS_RECT)
     else:
         t_progress_rect = list(T2_PROGRESS_RECT)
     # Only two possible values since only overtime or not
+    # related to y of STATUS_RECT
     # print(loc[1])
     if loc[1] > 10:
         dy = 43-(UNLOCKED_RECT[1]-STATUS_RECT[1])
@@ -257,18 +263,19 @@ def read_progress(src, templates):
     digit_2 = digit_2_scores[0][0]
     if digit_2_scores[0][1] < PERCENT_THRESHOLD: digit_2 = 0
 
-    print(digit_1_scores)
+    # print(digit_1_scores)
     # print(digit_2_scores)
+    percent = digit_2*10+digit_1
 
     # Prepare visual representation
-    img_full_progress = crop(src, full_progress_rect)
+    # img_full_progress = crop(src, full_progress_rect)
     # img_full_progress[:,:] = (0,0,0)
     # img_rect = digit_1_rect
     # dx = img_rect[0]-full_progress_rect[0]
     # dy = img_rect[1]-full_progress_rect[1]
     # img_full_progress[dy:dy+img_rect[3],dx:dx+img_rect[2]] = img_digit_1
 
-    return '{}{:d} {:d}{:d}'.format(map, state, digit_2, digit_1), img_full_progress
+    return map, state, percent
 
 templates = read_tempaltes()
 
@@ -285,10 +292,19 @@ def process_status(img):
             return '{}{:d}'.format(map, status), img
 
 def process_progress(img):
-    return read_progress(img, templates)
+    img_full_progress = crop(img, FULL_PROGRESS_RECT)
+
+    map, state, percent = read_progress(img, templates)
+
+
+    if state is None: return 'NA', img_full_progress
+    if state == -1: return '{:d}'.format(state), img_full_progress
+    if state == 0: return '{}{:d}'.format(map, state), img_full_progress
+
+    return '{} {:d} {:2d}'.format(map, state, percent), img_full_progress
 
 # save_templates()
 # tempaltes = read_tempaltes()
 
 # read_batch(process_status, start=4)
-read_batch(process_progress, start=2, num_height=16)
+# read_batch(process_progress, start=0, num_height=16)
