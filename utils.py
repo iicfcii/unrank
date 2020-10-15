@@ -10,7 +10,7 @@ def crop(img, rect):
     if y+h > img.shape[0]: h = img.shape[0]-y
 
     img_crop = img[y:y+h,x:x+w]
-    return img_crop
+    return img_crop.copy()
 
 # HSV color space
 def match_color(img, lb, ub):
@@ -42,8 +42,8 @@ def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_heigh
                 shape = img.shape
 
             if j < length:
-                img = cv2.putText(img, info, (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
-                img = cv2.putText(img, str(j*30), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, 255)
+                img = cv2.putText(img, info, (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,0))
+                img = cv2.putText(img, str(j*30), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,0))
             imgs.append(img)
 
         imgs_row = []
