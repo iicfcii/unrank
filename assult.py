@@ -173,7 +173,7 @@ def read_progress(src, templates):
             indices = (dtheta > 20).nonzero()[0] # If big gap, use value before gap
             if len(indices) > 0:
                 start = indices[0]
-            progress[point] = int(theta[start]/360*100)
+            progress[point] = round(theta[start]/360*100)
 
     # Prepare visual representation
     # img_full_progress[:,:] = (0,0,0)

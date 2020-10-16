@@ -168,7 +168,7 @@ def read_tempaltes():
 
     return templates
 
-def read_point_status(img, templates):
+def read_status(img, templates):
     img = crop(img, STATUS_RECT)
     scores = []
 
@@ -178,11 +178,11 @@ def read_point_status(img, templates):
     scores.append((-1, None, loc, res[loc]))
 
     for map in ['a', 'b', 'c']:
-        for state in [0,1,2]:
-            template, mask = templates[map][state]
+        for status in [0,1,2]:
+            template, mask = templates[map][status]
             res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
             loc = np.unravel_index(np.argmax(res), res.shape)
-            scores.append((state, map, loc, res[loc]))
+            scores.append((status, map, loc, res[loc]))
 
     scores.sort(reverse=True, key=lambda m:m[3])
     score = scores[0]
@@ -198,14 +198,14 @@ def read_point_status(img, templates):
 # map, 1, percent: if point is captured by team 1.
 # map, 2, percent: if point is captured by team 2.
 def read_progress(src, templates):
-    state, map, loc = read_point_status(src, templates)
+    status, map, loc = read_status(src, templates)
 
     img_full_progress = crop(src, FULL_PROGRESS_RECT)
-    if state is None: return None, None, None
-    if state == -1: return None, -1, None
-    if state == 0: return map, 0, 0
+    if status is None: return None, None, None
+    if status == -1: return None, -1, None
+    if status == 0: return map, 0, 0
 
-    if state == 1:
+    if status == 1:
         t_progress_rect = list(T1_PROGRESS_RECT)
     else:
         t_progress_rect = list(T2_PROGRESS_RECT)
@@ -222,7 +222,7 @@ def read_progress(src, templates):
 
     img = crop(src, t_progress_rect)
     # Find symbol location
-    template, mask = templates['symbol'][state]
+    template, mask = templates['symbol'][status]
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
     loc = np.unravel_index(np.argmax(res), res.shape)
 
@@ -238,8 +238,8 @@ def read_progress(src, templates):
 
     digit_1_scores = []
     for num in range(10):
-        template, mask = templates[num][state]
-        w_digit_1 = PERCENT_RECTS[num][state][2]
+        template, mask = templates[num][status]
+        w_digit_1 = PERCENT_RECTS[num][status][2]
         digit_1_rect = (t_progress_rect[0]+dx-w_digit_1-padx, t_progress_rect[1], w_digit_1+padx*2, t_progress_rect[3])
         img_digit_1 = crop(src, digit_1_rect)
         img_digit_1_scaled = cv2.resize(img_digit_1, None, fx=RATIO, fy=RATIO)
@@ -251,9 +251,9 @@ def read_progress(src, templates):
 
     digit_2_scores = []
     for num in range(10):
-        template, mask = templates[num][state]
-        w_digit_2 = PERCENT_RECTS[num][state][2]
-        w_digit_1 = PERCENT_RECTS[digit_1][state][2]
+        template, mask = templates[num][status]
+        w_digit_2 = PERCENT_RECTS[num][status][2]
+        w_digit_1 = PERCENT_RECTS[digit_1][status][2]
         digit_2_rect = (t_progress_rect[0]+dx-w_digit_2-w_digit_1-padx+1, t_progress_rect[1], w_digit_2+padx*2, t_progress_rect[3])
         img_digit_2 = crop(src, digit_2_rect)
         img_digit_2_scaled = cv2.resize(img_digit_2, None, fx=RATIO, fy=RATIO)
@@ -274,7 +274,7 @@ def read_progress(src, templates):
     # dy = img_rect[1]-full_progress_rect[1]
     # img_full_progress[dy:dy+img_rect[3],dx:dx+img_rect[2]] = img_digit_1
 
-    return map, state, percent
+    return map, status, percent
 
 templates = read_tempaltes()
 
@@ -293,14 +293,14 @@ def process_status(img):
 def process_progress(img):
     img_full_progress = crop(img, FULL_PROGRESS_RECT)
 
-    map, state, percent = read_progress(img, templates)
+    map, status, percent = read_progress(img, templates)
 
 
-    if state is None: return 'NA', img_full_progress
-    if state == -1: return '{:d}'.format(state), img_full_progress
-    if state == 0: return '{}{:d}'.format(map, state), img_full_progress
+    if status is None: return 'NA', img_full_progress
+    if status == -1: return '{:d}'.format(status), img_full_progress
+    if status == 0: return '{}{:d}'.format(map, status), img_full_progress
 
-    return '{} {:d} {:2d}'.format(map, state, percent), img_full_progress
+    return '{} {:d} {:2d}'.format(map, status, percent), img_full_progress
 
 # save_templates()
 # tempaltes = read_tempaltes()
