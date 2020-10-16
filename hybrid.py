@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 from utils import crop, match_color, read_batch, number_to_string
-from assult import read_point
-from escort import read_payload, PAYLOAD_START_X, PAYLOAD_END_X, PAYLOAD_RECT_WIDTH, PAYLOAD_WIDTH, PAYLOAD_HEIGHT, PAYLOAD_MASK, PAYLOAD_THRESHOLD
+import assult
+import escort
 
 LOCKED_RECT = (605,82,25,25)
 LOCKED_MASK = np.array([
@@ -13,12 +13,12 @@ LOCKED_MASK = np.array([
     [0,int(LOCKED_RECT[3]/2)],
 ], dtype=np.int32)
 
-PAYLOAD_RECT = (544,76,PAYLOAD_WIDTH,PAYLOAD_HEIGHT)
+PAYLOAD_RECT = (544,76,escort.PAYLOAD_WIDTH,escort.PAYLOAD_HEIGHT)
 
 STATUS_RECT = (489,71,303,46)
 STATUS_POINT_RECT = (594,71,46,46)
 STATUS_POINT_CAPTURED_RECT = (489,71,46,46)
-STATUS_PAYLOAD_RECT = (538,71,PAYLOAD_RECT_WIDTH,46)
+STATUS_PAYLOAD_RECT = (538,71,escort.PAYLOAD_RECT_WIDTH,46)
 STATUS_THRESHOLD = 0.6
 
 def save_templates():
@@ -67,7 +67,7 @@ def read_tempaltes():
     for team in [1,2]:
         img = cv2.imread('template/hybrid_payload_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
         mask = np.zeros((PAYLOAD_RECT[3],PAYLOAD_RECT[2]), dtype=np.uint8)
-        mask = cv2.fillConvexPoly(mask, PAYLOAD_MASK, 255)
+        mask = cv2.fillConvexPoly(mask, escort.PAYLOAD_MASK, 255)
         templates['payload'][team] = (img, mask)
 
     # img, mask = templates['payload'][2]
@@ -121,7 +121,7 @@ def read_status(src, templates):
             return None, None, None, None
     elif score[0] == 'point' and score[1] == -2: # Payload moving
         score_payload = [s for s in scores if s[0] == 'payload'][0] # First score with payload
-        if score_payload[3] > PAYLOAD_THRESHOLD:
+        if score_payload[3] > escort.PAYLOAD_THRESHOLD:
             return 0, None, score_payload[1], (score_payload[2][1],score_payload[2][0]) # Attacking team
         else:
             return None, None, None, None
@@ -151,7 +151,7 @@ def read_progress(src, templates):
             int(STATUS_POINT_RECT[2]/2),
             int(STATUS_POINT_RECT[3]/2+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]))
         )
-        percent = read_point(img, center, team)
+        percent = assult.read_point(img, center, team)
         if percent is None: percent = 0
 
         return team, percent, -1
@@ -160,7 +160,7 @@ def read_progress(src, templates):
         team = 2 if status_b == 1 else 1
         loc = loc_b
 
-        percent = read_payload(loc[0])
+        percent = escort.read_payload(loc[0])
 
         return team, 100, percent # Defending team
 
@@ -181,19 +181,13 @@ def process_progress(img):
     team, progress_point, progress_payload = read_progress(img, templates)
     img_progress = crop(img, STATUS_RECT)
 
-    if progress_point is not None and progress_point > -1 and progress_point < 100:
-        x_center = STATUS_POINT_RECT[0]-STATUS_RECT[0]+STATUS_POINT_RECT[2]/2
-        y_center = STATUS_RECT[3]/2
-        rad = progress_point/100*np.pi*2
-        x = int(x_center+np.sin(rad)*16)
-        y = int(y_center-np.cos(rad)*16)
-        img_progress = cv2.circle(img_progress, (x,y), 3, 0, thickness=-1)
-
-    if progress_payload is not None and progress_payload > -1:
-        dx = PAYLOAD_START_X+STATUS_PAYLOAD_RECT[0]-STATUS_RECT[0]+PAYLOAD_WIDTH/2
-        x =  int(progress_payload/100*(PAYLOAD_END_X-PAYLOAD_START_X)+dx)
-        y =  20
-        img_progress = cv2.circle(img_progress, (x,y), 3, 0, thickness=-1)
+    assult.mark_progress(
+        img_progress,
+        progress_point,
+        STATUS_POINT_RECT[0]-STATUS_RECT[0]+STATUS_POINT_RECT[2]/2,
+        STATUS_RECT[3]/2
+    )
+    escort.mark_progress(img_progress, progress_payload, STATUS_PAYLOAD_RECT[0]-STATUS_RECT[0], 2)
 
     return '{} {} {}'.format(
         number_to_string(team),

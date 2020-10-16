@@ -86,10 +86,10 @@ def read_status(src, templates):
     scores.sort(reverse=True, key=lambda m:m[2])
     score = scores[0]
 
-    print(scores)
+    # print(scores)
     threshold = STATUS_THRESHOLD if score[0] == -1 else PAYLOAD_THRESHOLD
     if score[2] > threshold:
-        return score[0], (score[1][1],score[1][0])
+        return score[0], (score[1][1],score[1][0]) # Attacking team
     else:
         return None, None
 
@@ -105,7 +105,7 @@ def read_progress(src, templates):
     team = 2 if status == 1 else 1
     percent = read_payload(loc[0])
 
-    return team, percent
+    return team, percent  # Defending team
 
 save_templates()
 templates = read_tempaltes()
@@ -115,18 +115,22 @@ def process_status(src):
 
     img = crop(src, STATUS_RECT)
 
-    if status is None: return 'NA'.format(status), img
-    return '{:d}'.format(status), img
+    return '{}'.format(number_to_string(status)), img
+
+def mark_progress(img, progress, dx, dy):
+    if progress is not None and progress > -1:
+        dx = PAYLOAD_START_X+PAYLOAD_WIDTH/2+dx
+        x =  int(progress/100*(PAYLOAD_END_X-PAYLOAD_START_X)+dx)
+        y =  18+dy
+        img = cv2.circle(img, (x,y), 3, 0, thickness=-1)
+
+    return img
 
 def process_progress(img):
     team, progress = read_progress(img, templates)
     img_progress = crop(img, STATUS_RECT)
 
-    if progress is not None and progress > -1:
-        dx = PAYLOAD_START_X+PAYLOAD_WIDTH/2
-        x =  int(progress/100*(PAYLOAD_END_X-PAYLOAD_START_X)+dx)
-        y =  18
-        img_progress = cv2.circle(img_progress, (x,y), 3, 0, thickness=-1)
+    mark_progress(img_progress, progress, 0, 0)
 
     return '{} {}'.format(
         number_to_string(team),

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch
+from utils import crop, match_color, read_batch, number_to_string
 
 PROGRESS_RECT = (592,71,96,46)
 PROGRESS_RECT_1 = (592,71,46,46)
@@ -181,14 +181,6 @@ def read_progress(src, templates):
     percent = read_point(img_progress, center, team[point])
     if percent is not None: progress[point] = percent
 
-    # Prepare visual representation
-    # img_full_progress[:,:] = (0,0,0)
-    # img_rect = progress_rect[point]
-    # dx = img_rect[0]-PROGRESS_RECT[0]
-    # dy = img_rect[1]-PROGRESS_RECT[1]
-    # img_progress[img_match > 0] = (255,0,0)
-    # img_full_progress[dy:dy+img_rect[3],dx:dx+img_rect[2]] = img_progress
-
     return team[point], progress['A'], progress['B']
 
 save_templates()
@@ -198,26 +190,45 @@ def process_status(src):
     status_a, loc_a, status_b, loc_b = read_status(src, templates)
     img = crop(src, PROGRESS_RECT)
 
-    if status_a is None or status_b is None: return 'NA', img
-    return '{:d} {:d}'.format(status_a, status_b), img
+    return '{} {}'.format(
+        number_to_string(status_a),
+        number_to_string(status_b)
+    ), img
+
+def mark_progress(img, progress, dx, dy):
+    if progress is not None and progress > -1 and progress < 100:
+        x_center = dx
+        y_center = dy
+        rad = progress/100*np.pi*2
+        x = int(x_center+np.sin(rad)*16)
+        y = int(y_center-np.cos(rad)*16)
+        img = cv2.circle(img, (x,y), 3, 0, thickness=-1)
+
+    return img
 
 def process_progress(src):
     team, progress_A, progress_B = read_progress(src, templates)
     img_full_progress = crop(src, PROGRESS_RECT)
-    if team is None:
-        team = 'NA'
-    else:
-        team = str(team)
-    if progress_A is None:
-        progress_A = 'NA'
-    else:
-        progress_A = str(progress_A)
-    if progress_B is None:
-        progress_B = 'NA'
-    else:
-        progress_B = str(progress_B)
 
-    return '{} {} {}'.format(team, progress_A, progress_B), img_full_progress
+    mark_progress(
+        img_full_progress,
+        progress_A,
+        PROGRESS_RECT_1[0]-PROGRESS_RECT[0]+PROGRESS_RECT_1[2]/2,
+        PROGRESS_RECT_1[3]/2,
+    )
+
+    mark_progress(
+        img_full_progress,
+        progress_B,
+        PROGRESS_RECT_2[0]-PROGRESS_RECT[0]+PROGRESS_RECT_2[2]/2,
+        PROGRESS_RECT_1[3]/2,
+    )
+
+    return '{} {} {}'.format(
+        number_to_string(team),
+        number_to_string(progress_A),
+        number_to_string(progress_B)
+    ), img_full_progress
 
 # read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
 # read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
