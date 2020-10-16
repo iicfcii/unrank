@@ -1,9 +1,8 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch
+from utils import crop, match_color, read_batch, number_to_string
 
-STATUS_RECT = (514,71,254,42)
 LOCKED_RECT = (627,80,25,25)
 LOCKED_MASK = np.array([
     [int(LOCKED_RECT[2]/2), 0],
@@ -12,7 +11,12 @@ LOCKED_MASK = np.array([
     [0,int(LOCKED_RECT[3]/2)],
 ], dtype=np.int32)
 
-PAYLOAD_RECT = (519,76,9,13)
+PAYLOAD_START_X = 5
+PAYLOAD_END_X = 240
+PAYLOAD_WIDTH = 9
+PAYLOAD_HEIGHT = 15
+PAYLOAD_RECT_WIDTH = 254
+PAYLOAD_RECT = (519,75,PAYLOAD_WIDTH,PAYLOAD_HEIGHT)
 PAYLOAD_TILT_Y = 4
 PAYLOAD_MASK = np.array([
     [0, 0],
@@ -21,9 +25,9 @@ PAYLOAD_MASK = np.array([
     [int(PAYLOAD_RECT[2]/2),PAYLOAD_RECT[3]-1],
     [0,PAYLOAD_RECT[3]-PAYLOAD_TILT_Y],
 ], dtype=np.int32)
-PAYLOAD_START_X = 5
-PAYLOAD_END_X = 240
+PAYLOAD_THRESHOLD = 0.5
 
+STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
 STATUS_THRESHOLD = 0.6
 
 def save_templates():
@@ -82,20 +86,26 @@ def read_status(src, templates):
     scores.sort(reverse=True, key=lambda m:m[2])
     score = scores[0]
 
-    if score[2] > STATUS_THRESHOLD:
+    print(scores)
+    threshold = STATUS_THRESHOLD if score[0] == -1 else PAYLOAD_THRESHOLD
+    if score[2] > threshold:
         return score[0], (score[1][1],score[1][0])
     else:
         return None, None
+
+def read_payload(x):
+    return round((x-PAYLOAD_START_X)/(PAYLOAD_END_X-PAYLOAD_START_X)*100)
 
 def read_progress(src, templates):
     status, loc = read_status(src, templates)
 
     if status is None: return None, None
-    if status == -1: return -1, 0
+    if status == -1: return None, -1
 
-    percent = round((loc[0]-PAYLOAD_START_X)/(PAYLOAD_END_X-PAYLOAD_START_X)*100)
+    team = 2 if status == 1 else 1
+    percent = read_payload(loc[0])
 
-    return status, percent
+    return team, percent
 
 save_templates()
 templates = read_tempaltes()
@@ -109,17 +119,19 @@ def process_status(src):
     return '{:d}'.format(status), img
 
 def process_progress(img):
+    team, progress = read_progress(img, templates)
     img_progress = crop(img, STATUS_RECT)
-    status, percent = read_progress(img, templates)
 
-    if status is None: return 'NA', img_progress
+    if progress is not None and progress > -1:
+        dx = PAYLOAD_START_X+PAYLOAD_WIDTH/2
+        x =  int(progress/100*(PAYLOAD_END_X-PAYLOAD_START_X)+dx)
+        y =  18
+        img_progress = cv2.circle(img_progress, (x,y), 3, 0, thickness=-1)
 
-    x =  int(percent/100*(PAYLOAD_END_X-PAYLOAD_START_X)+PAYLOAD_START_X+4)
-    y =  10
-    img_progress = cv2.circle(img_progress, (x,y), 5, 0, thickness=-1)
-
-
-    return '{:d} {:d}'.format(status, percent), img_progress
+    return '{} {}'.format(
+        number_to_string(team),
+        number_to_string(progress)
+    ), img_progress
 
 # read_batch(process_status, start=0, map='rialto', length=470, num_width=6, num_height=12)
-read_batch(process_progress, start=0, map='rialto', length=470, num_width=6, num_height=12)
+# read_batch(process_progress, start=0, map='rialto', length=470, num_width=6, num_height=12)

@@ -114,6 +114,39 @@ def read_status(src, templates):
 
     return status['A'][0],status['A'][1],status['B'][0],status['B'][1]
 
+def read_point(img_progress, center, team):
+    mask= np.zeros((img_progress.shape[0],img_progress.shape[1]), dtype=np.uint8)
+    mask = cv2.circle(mask, center, 16, 255, thickness=4)
+    img_progress[mask == 0] = (0,0,0)
+
+    if team == 1:
+        img_match = match_color(img_progress, TEAM2_COLOR_LB, TEAM2_COLOR_UB)
+    else:
+        img_match = match_color(img_progress, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
+    img_match = cv2.morphologyEx(img_match, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,2)), iterations=1, borderValue=0)
+
+    # Convert all valid pixles to angle
+    pts = np.transpose(np.array((img_match > 0).nonzero()))
+    pts[:,[0,1]] = pts[:,[1,0]] # Swap so that pt=(x,y)
+    # Calculate angle using atan2(y,x)
+    # bottom to top is x, left to right is y
+    theta = np.arctan2(pts[:,0]-center[0], -(pts[:,1]-center[1]))
+    # Convert to 0-2pi
+    theta[theta < 0] += 2*np.pi
+    # Sort and covnert to degrees
+    theta = np.sort(theta)/np.pi*180
+    if theta.shape[0] > 1:
+        # Use average delta theta and initial angle to filter miss match
+        dtheta = theta[1:]-theta[0:-1]
+        if np.mean(dtheta) < 5 and theta[0] < 15:         # Mean of dtheta indicates the scatterness of data
+            start = -1
+            indices = (dtheta > 20).nonzero()[0] # If big gap, use value before gap
+            if len(indices) > 0: start = indices[0]
+            progress = round(theta[start]/360*100)
+            return progress
+
+    return None
+
 def read_progress(src, templates):
     status_a, loc_a, status_b, loc_b = read_status(src, templates)
 
@@ -145,35 +178,8 @@ def read_progress(src, templates):
         dy = 10
     img_progress = crop(src, progress_rect[point])
     center = (int(progress_rect[point][2]/2), int(progress_rect[point][3]/2+(dy-ICON_RECT_1[1]+progress_rect[point][1])))
-    mask= np.zeros((img_progress.shape[0],img_progress.shape[1]), dtype=np.uint8)
-    mask = cv2.circle(mask, center, 16, 255, thickness=4)
-    img_progress[mask == 0] = (0,0,0)
-
-    if team[point] == 1:
-        img_match = match_color(img_progress, TEAM2_COLOR_LB, TEAM2_COLOR_UB)
-    else:
-        img_match = match_color(img_progress, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
-    img_match = cv2.morphologyEx(img_match, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,2)), iterations=1, borderValue=0)
-
-    # Convert all valid pixles to angle
-    pts = np.transpose(np.array((img_match > 0).nonzero()))
-    pts[:,[0,1]] = pts[:,[1,0]] # Swap so that pt=(x,y)
-    # Calculate angle using atan2(y,x)
-    # bottom to top is x, left to right is y
-    theta = np.arctan2(pts[:,0]-center[0], -(pts[:,1]-center[1]))
-    # Convert to 0-2pi
-    theta[theta < 0] += 2*np.pi
-    # Sort and covnert to degrees
-    theta = np.sort(theta)/np.pi*180
-    if theta.shape[0] > 1:
-        # Use average delta theta and initial angle to filter miss match
-        dtheta = theta[1:]-theta[0:-1]
-        if np.mean(dtheta) < 5 and theta[0] < 15:         # Mean of dtheta indicates the scatterness of data
-            start = -1
-            indices = (dtheta > 20).nonzero()[0] # If big gap, use value before gap
-            if len(indices) > 0:
-                start = indices[0]
-            progress[point] = round(theta[start]/360*100)
+    percent = read_point(img_progress, center, team[point])
+    if percent is not None: progress[point] = percent
 
     # Prepare visual representation
     # img_full_progress[:,:] = (0,0,0)
@@ -214,4 +220,4 @@ def process_progress(src):
     return '{} {} {}'.format(team, progress_A, progress_B), img_full_progress
 
 # read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
-read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
+# read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)

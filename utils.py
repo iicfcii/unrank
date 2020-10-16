@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 
+def number_to_string(val):
+    if val is None: return 'NA'
+    return str(val)
+
 def crop(img, rect):
     x, y, w, h = rect
 
