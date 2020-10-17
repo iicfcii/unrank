@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch, number_to_string
+from utils import crop, match_color, read_batch, val_to_string
 
 LOCKED_RECT = (627,80,25,25)
 LOCKED_MASK = np.array([
@@ -115,7 +115,7 @@ def process_status(src):
 
     img = crop(src, STATUS_RECT)
 
-    return '{}'.format(number_to_string(status)), img
+    return '{}'.format(val_to_string(status)), img
 
 def mark_progress(img, progress, dx, dy):
     if progress is not None and progress > -1:
@@ -133,8 +133,8 @@ def process_progress(img):
     mark_progress(img_progress, progress, 0, 0)
 
     return '{} {}'.format(
-        number_to_string(team),
-        number_to_string(progress)
+        val_to_string(team),
+        val_to_string(progress)
     ), img_progress
 
 # read_batch(process_status, start=0, map='rialto', length=470, num_width=6, num_height=12)

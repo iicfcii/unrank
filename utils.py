@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def number_to_string(val):
+def val_to_string(val):
     if val is None: return 'NA'
     return str(val)
 

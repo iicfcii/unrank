@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch, number_to_string
+from utils import crop, match_color, read_batch, val_to_string
 
 PROGRESS_RECT = (592,71,96,46)
 PROGRESS_RECT_1 = (592,71,46,46)
@@ -191,8 +191,8 @@ def process_status(src):
     img = crop(src, PROGRESS_RECT)
 
     return '{} {}'.format(
-        number_to_string(status_a),
-        number_to_string(status_b)
+        val_to_string(status_a),
+        val_to_string(status_b)
     ), img
 
 def mark_progress(img, progress, dx, dy):
@@ -225,9 +225,9 @@ def process_progress(src):
     )
 
     return '{} {} {}'.format(
-        number_to_string(team),
-        number_to_string(progress_A),
-        number_to_string(progress_B)
+        val_to_string(team),
+        val_to_string(progress_A),
+        val_to_string(progress_B)
     ), img_full_progress
 
 # read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)

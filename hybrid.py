@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch, number_to_string
+from utils import crop, match_color, read_batch, val_to_string
 import assult
 import escort
 
@@ -173,8 +173,8 @@ def process_status(src):
     img = crop(src, STATUS_RECT)
 
     return '{} {} '.format(
-        number_to_string(status_a),
-        number_to_string(status_b)
+        val_to_string(status_a),
+        val_to_string(status_b)
     ), img
 
 def process_progress(img):
@@ -190,9 +190,9 @@ def process_progress(img):
     escort.mark_progress(img_progress, progress_payload, STATUS_PAYLOAD_RECT[0]-STATUS_RECT[0], 2)
 
     return '{} {} {}'.format(
-        number_to_string(team),
-        number_to_string(progress_point),
-        number_to_string(progress_payload)
+        val_to_string(team),
+        val_to_string(progress_point),
+        val_to_string(progress_payload)
     ), img_progress
 
 
