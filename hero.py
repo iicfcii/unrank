@@ -146,10 +146,7 @@ def read_templates():
     return templates
 
 def read_hero(src, rect, templates):
-    rect = (rect[0]-MATCH_PADDING,
-            rect[1]-MATCH_PADDING,
-            rect[2]+2*MATCH_PADDING,
-            rect[3]+2*MATCH_PADDING)
+    rect = (rect[0]-MATCH_PADDING,rect[1],rect[2]+2*MATCH_PADDING,rect[3])
 
     img = crop(src, rect)
 
@@ -197,4 +194,4 @@ def process_heroes(src):
     return ' '.join(heroes), img
 
 # read_batch(process_hero, start=0, map='volskaya', length=731)
-# read_batch(process_heroes, start=0, map='volskaya', length=731, num_width=2, num_height=16)
+read_batch(process_heroes, start=0, map='volskaya', length=731, num_width=2, num_height=32)

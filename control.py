@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import crop, match_color, read_batch
+from utils import crop, match_color, read_batch, val_to_string
 
 STATUS_RECT = (624,52,32,80)
 LOCKED_RECT = (626,80,28,28)
@@ -247,7 +247,8 @@ def read_progress(src, templates):
         digit_1_scores.append((num, np.max(res)))
     digit_1_scores.sort(reverse=True, key=lambda s:s[1])
     digit_1 = digit_1_scores[0][0]
-    if digit_1_scores[0][1] < PERCENT_THRESHOLD: digit_1 = -1
+    if digit_1_scores[0][1] < PERCENT_THRESHOLD:
+        return map, status, None
 
     digit_2_scores = []
     for num in range(10):
@@ -267,13 +268,6 @@ def read_progress(src, templates):
     # print(digit_2_scores)
     percent = digit_2*10+digit_1
 
-    # Prepare visual representation
-    # img_full_progress[:,:] = (0,0,0)
-    # img_rect = digit_1_rect
-    # dx = img_rect[0]-full_progress_rect[0]
-    # dy = img_rect[1]-full_progress_rect[1]
-    # img_full_progress[dy:dy+img_rect[3],dx:dx+img_rect[2]] = img_digit_1
-
     return map, status, percent
 
 templates = read_tempaltes()
@@ -282,28 +276,24 @@ def process_status(img):
     status, map, loc = read_status(img, templates)
 
     img = crop(img, STATUS_RECT)
-    if status is None:
-        return 'NA', img
-    else:
-        if map is None:
-            return '{:d}'.format(status), img
-        else:
-            return '{}{:d}'.format(map, status), img
+    return '{}{}'.format(
+        val_to_string(map),
+        val_to_string(status)
+    ), img
 
 def process_progress(img):
     img_full_progress = crop(img, FULL_PROGRESS_RECT)
 
     map, status, percent = read_progress(img, templates)
 
-
-    if status is None: return 'NA', img_full_progress
-    if status == -1: return '{:d}'.format(status), img_full_progress
-    if status == 0: return '{}{:d}'.format(map, status), img_full_progress
-
-    return '{} {:d} {:2d}'.format(map, status, percent), img_full_progress
+    return '{} {} {}'.format(
+        val_to_string(map),
+        val_to_string(status),
+        val_to_string(percent)
+    ), img_full_progress
 
 # save_templates()
 # tempaltes = read_tempaltes()
 
 # read_batch(process_status, start=4)
-# read_batch(process_progress, start=0, num_height=16)
+read_batch(process_progress, start=0, num_height=16)
