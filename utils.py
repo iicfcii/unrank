@@ -16,6 +16,15 @@ def crop(img, rect):
     img_crop = img[y:y+h,x:x+w]
     return img_crop.copy()
 
+def pad_rect(rect, dx, dy):
+    return (
+        rect[0]-dx,
+        rect[1]-dy,
+        rect[2]+dx*2,
+        rect[3]+dy*2
+    )
+
+
 # HSV color space
 def match_color(img, lb, ub):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -31,6 +40,31 @@ def match_color(img, lb, ub):
     img_bin[np.all((h_match, s_match, v_match), axis=0)] = 255
 
     return img_bin
+
+def extract_locs(res, match_threshold, dist_threshold):
+    locs = np.where(res>=match_threshold)
+
+    if len(locs[0]) == 0: return []
+
+    # Sort locations so that ones with higher res are preserved
+    # locations:[(x,y,score),(x,y,score),(x,y,score)...]
+    locs = [(x, y, res[y,x]) for y,x in np.transpose(np.array(locs))]
+    locs.sort(reverse=True, key=lambda l:l[2])
+
+    # Clean up clustered location
+    locs_s = []
+    for l in locs:
+        tooClose = False
+        for l_s in locs_s:
+            if (l[0]-l_s[0])**2+(l[1]-l_s[1])**2 < dist_threshold**2:
+                tooClose = True
+                break
+        if not tooClose:
+            locs_s.append(l)
+
+    # print(locs_s)
+
+    return locs_s
 
 def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
     shape = None

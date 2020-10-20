@@ -194,4 +194,4 @@ def process_heroes(src):
     return ' '.join(heroes), img
 
 # read_batch(process_hero, start=0, map='volskaya', length=731)
-read_batch(process_heroes, start=0, map='volskaya', length=731, num_width=2, num_height=32)
+# read_batch(process_heroes, start=0, map='volskaya', length=731, num_width=2, num_height=32)
