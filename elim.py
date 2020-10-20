@@ -14,6 +14,7 @@ ELIMS_RECT = (910,110,350,210)
 RATIO = 1.5 # Scale image to make threshold clearer
 ELIM_THRESHOLD = 0.9
 DIST_THRESHOLD = 30
+SYMBOL_THRESHOLD = 0.38
 
 # NOTE: tune tighter so that won't make mistake
 # Elim will appear on multiple frames to make up the missed ones
@@ -61,8 +62,28 @@ def read_rects():
 
     return rects
 
+def save_templates():
+    rects = read_rects()
+
+    img = cv2.imread('img/volskaya/volskaya_3060.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/elim_1.jpg', crop(img, rects[3]))
+
+    img = cv2.imread('img/volskaya/volskaya_15570.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/elim_7.jpg', crop(img, rects[12]))
+
 def read_templates():
     templates = {}
+
+    templates['symbol'] = {}
+    img = cv2.imread('template/elim_1.jpg', cv2.IMREAD_COLOR)
+    img_match = match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
+    img[img_match == 0] = (127,127,127) # Set to middle so that any color won't differ too much
+    templates['symbol'][1] = img
+
+    img = cv2.imread('template/elim_7.jpg', cv2.IMREAD_COLOR)
+    img_match = match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
+    img[img_match == 0] = (127,127,127)
+    templates['symbol'][7] = img
 
     ratio = 0.7
     for hero in HEROES:
@@ -73,27 +94,26 @@ def read_templates():
         img = cv2.resize(img, None, fx=RATIO, fy=RATIO)
         templates[hero] = img
 
+    # cv2.imshow('elim', templates['symbol'][7])
     # cv2.imshow('hero', templates['doomfist'])
     # cv2.waitKey(0)
 
     return templates
 
 def read_status(src, rects, templates):
-    # 0 indicates no elim
-    # 1 indicates MAY have elims
-    status = 0
-    rs = []
+    status = []
+    # scores = []
 
     for p in rects:
-        img = crop(src, rects[p])
-        img_match = match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
-        r = (np.sum(img_match)/255)/(img_match.shape[0]*img_match.shape[1])
-        rs.append(r)
+        img = crop(src, pad_rect(rects[p],2,0))
+        res = cv2.matchTemplate(img, templates['symbol'][1 if p < 7 else 7], cv2.TM_CCOEFF_NORMED)
+        # scores.append(np.max(res))
+        if np.max(res) > SYMBOL_THRESHOLD:
+            status.append(1)
+        else:
+            status.append(0)
 
-    # print(rs)
-
-    rs.sort(reverse=True, key=lambda r:r)
-    if rs[0] > 0.3: status = 1
+    # print(scores)
 
     return status
 
@@ -127,7 +147,7 @@ def determine_team(img_elim):
 def read_elims(src, rects, templates):
     img = crop(src, ELIMS_RECT)
     status = read_status(src, rects, templates)
-    if status == 0: return None
+    if np.sum(status) == 0: return None
 
     img_scaled = cv2.resize(img, None, fx=RATIO, fy=RATIO)
 
@@ -185,6 +205,7 @@ def read_elims(src, rects, templates):
 
     return heroes_organized
 
+save_templates()
 templates = read_templates()
 rects = read_rects()
 
@@ -193,9 +214,11 @@ def process_status(src):
 
     imgs = []
     for p in rects:
-        imgs.append(crop(src, pad_rect(rects[p],0,10)))
+        imgs.append(crop(src, pad_rect(rects[p],1,10)))
 
-    return '{:d}'.format(status), cv2.hconcat(imgs, 12)
+    status = ['{:<3d}'.format(s) for s in status]
+
+    return ''.join(status), cv2.hconcat(imgs, 12)
 
 def process_elims(src):
     img = crop(src, ELIMS_RECT)
@@ -213,6 +236,5 @@ def process_elims(src):
     return ' '.join(heroes_str), img
 
 # read_batch(process_status, start=1, map='volskaya', length=731, num_width=3, num_height=16)
-# read_batch(process_elims, start=0, map='volskaya', length=731, num_width=5, num_height=4)
 read_batch(process_elims, start=0, map='volskaya', length=731, num_width=5, num_height=4)
 # read_batch(process_elims, start=0, map='rialto', length=470, num_width=5, num_height=4)
