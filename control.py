@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
+import json
+import matplotlib.pyplot as plt
 
-from utils import crop, match_color, read_batch, val_to_string
+import utils
 
 STATUS_RECT = (624,52,32,80)
 LOCKED_RECT = (626,80,28,28)
@@ -45,74 +47,74 @@ T2_PROGRESS_RECT = (671,64,36,17)
 
 def save_templates():
     img = cv2.imread('img/nepal/nepal_600.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_locked.jpg', crop(img, LOCKED_RECT))
+    cv2.imwrite('template/control_locked.jpg', utils.crop(img, LOCKED_RECT))
 
     img = cv2.imread('img/nepal/nepal_2130.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_c_0.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_c_0.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/nepal/nepal_2760.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_c_1.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_c_1.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/nepal/nepal_6780.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_c_2.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_c_2.jpg', utils.crop(img, UNLOCKED_RECT))
 
     img = cv2.imread('img/nepal/nepal_11910.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_b_0.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_b_0.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/nepal/nepal_12180.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_b_1.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_b_1.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/nepal/nepal_13650.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_b_2.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_b_2.jpg', utils.crop(img, UNLOCKED_RECT))
 
     img = cv2.imread('img/nepal/nepal_20670.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_a_0.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_a_0.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/control_a1/control_a1_240.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_a_1.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_a_1.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('img/nepal/nepal_20880.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_a_2.jpg', crop(img, UNLOCKED_RECT))
+    cv2.imwrite('template/control_a_2.jpg', utils.crop(img, UNLOCKED_RECT))
 
     img = cv2.imread('img/nepal/nepal_2760.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_symbol_1.jpg', crop(img, PERCENT_RECTS['symbol'][1]))
-    cv2.imwrite('template/control_0_1.jpg', crop(img, PERCENT_RECTS[0][1]))
+    cv2.imwrite('template/control_symbol_1.jpg', utils.crop(img, PERCENT_RECTS['symbol'][1]))
+    cv2.imwrite('template/control_0_1.jpg', utils.crop(img, PERCENT_RECTS[0][1]))
     img = cv2.imread('img/nepal/nepal_2790.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_1_1.jpg', crop(img, PERCENT_RECTS[1][1]))
+    cv2.imwrite('template/control_1_1.jpg', utils.crop(img, PERCENT_RECTS[1][1]))
     img = cv2.imread('img/nepal/nepal_2820.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_2_1.jpg', crop(img, PERCENT_RECTS[2][1]))
+    cv2.imwrite('template/control_2_1.jpg', utils.crop(img, PERCENT_RECTS[2][1]))
     img = cv2.imread('img/nepal/nepal_2850.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_3_1.jpg', crop(img, PERCENT_RECTS[3][1]))
+    cv2.imwrite('template/control_3_1.jpg', utils.crop(img, PERCENT_RECTS[3][1]))
     img = cv2.imread('img/nepal/nepal_2880.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_4_1.jpg', crop(img, PERCENT_RECTS[4][1]))
+    cv2.imwrite('template/control_4_1.jpg', utils.crop(img, PERCENT_RECTS[4][1]))
     img = cv2.imread('img/nepal/nepal_2940.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_5_1.jpg', crop(img, PERCENT_RECTS[5][1]))
+    cv2.imwrite('template/control_5_1.jpg', utils.crop(img, PERCENT_RECTS[5][1]))
     img = cv2.imread('img/nepal/nepal_2970.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_6_1.jpg', crop(img, PERCENT_RECTS[6][1]))
+    cv2.imwrite('template/control_6_1.jpg', utils.crop(img, PERCENT_RECTS[6][1]))
     img = cv2.imread('img/nepal/nepal_3000.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_7_1.jpg', crop(img, PERCENT_RECTS[7][1]))
+    cv2.imwrite('template/control_7_1.jpg', utils.crop(img, PERCENT_RECTS[7][1]))
     img = cv2.imread('img/nepal/nepal_3030.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_8_1.jpg', crop(img, PERCENT_RECTS[8][1]))
+    cv2.imwrite('template/control_8_1.jpg', utils.crop(img, PERCENT_RECTS[8][1]))
     img = cv2.imread('img/nepal/nepal_3060.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_9_1.jpg', crop(img, PERCENT_RECTS[9][1]))
+    cv2.imwrite('template/control_9_1.jpg', utils.crop(img, PERCENT_RECTS[9][1]))
 
     img = cv2.imread('img/nepal/nepal_6270.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_symbol_2.jpg', crop(img, PERCENT_RECTS['symbol'][2]))
-    cv2.imwrite('template/control_0_2.jpg', crop(img, PERCENT_RECTS[0][2]))
+    cv2.imwrite('template/control_symbol_2.jpg', utils.crop(img, PERCENT_RECTS['symbol'][2]))
+    cv2.imwrite('template/control_0_2.jpg', utils.crop(img, PERCENT_RECTS[0][2]))
     img = cv2.imread('img/nepal/nepal_6300.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_1_2.jpg', crop(img, PERCENT_RECTS[1][2]))
+    cv2.imwrite('template/control_1_2.jpg', utils.crop(img, PERCENT_RECTS[1][2]))
     img = cv2.imread('img/nepal/nepal_6330.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_2_2.jpg', crop(img, PERCENT_RECTS[2][2]))
+    cv2.imwrite('template/control_2_2.jpg', utils.crop(img, PERCENT_RECTS[2][2]))
     img = cv2.imread('img/nepal/nepal_6390.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_3_2.jpg', crop(img, PERCENT_RECTS[3][2]))
+    cv2.imwrite('template/control_3_2.jpg', utils.crop(img, PERCENT_RECTS[3][2]))
     img = cv2.imread('img/nepal/nepal_6420.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_4_2.jpg', crop(img, PERCENT_RECTS[4][2]))
+    cv2.imwrite('template/control_4_2.jpg', utils.crop(img, PERCENT_RECTS[4][2]))
     img = cv2.imread('img/nepal/nepal_6450.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_5_2.jpg', crop(img, PERCENT_RECTS[5][2]))
+    cv2.imwrite('template/control_5_2.jpg', utils.crop(img, PERCENT_RECTS[5][2]))
     img = cv2.imread('img/nepal/nepal_6480.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_6_2.jpg', crop(img, PERCENT_RECTS[6][2]))
+    cv2.imwrite('template/control_6_2.jpg', utils.crop(img, PERCENT_RECTS[6][2]))
     img = cv2.imread('img/nepal/nepal_6510.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_7_2.jpg', crop(img, PERCENT_RECTS[7][2]))
+    cv2.imwrite('template/control_7_2.jpg', utils.crop(img, PERCENT_RECTS[7][2]))
     img = cv2.imread('img/nepal/nepal_6540.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_8_2.jpg', crop(img, PERCENT_RECTS[8][2]))
+    cv2.imwrite('template/control_8_2.jpg', utils.crop(img, PERCENT_RECTS[8][2]))
     img = cv2.imread('img/nepal/nepal_6600.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/control_9_2.jpg', crop(img, PERCENT_RECTS[9][2]))
+    cv2.imwrite('template/control_9_2.jpg', utils.crop(img, PERCENT_RECTS[9][2]))
 
-    # cv2.imshow('img', crop(img, PERCENT_RECTS[1][2]))
+    # cv2.imshow('img', utils.crop(img, PERCENT_RECTS[1][2]))
     # cv2.waitKey(0)
 
 def read_tempaltes():
@@ -169,7 +171,7 @@ def read_tempaltes():
     return templates
 
 def read_status(img, templates):
-    img = crop(img, STATUS_RECT)
+    img = utils.crop(img, STATUS_RECT)
     scores = []
 
     template, mask = templates['locked']
@@ -200,7 +202,7 @@ def read_status(img, templates):
 def read_progress(src, templates):
     status, map, loc = read_status(src, templates)
 
-    img_full_progress = crop(src, FULL_PROGRESS_RECT)
+    img_full_progress = utils.crop(src, FULL_PROGRESS_RECT)
     if status is None: return None, None, None
     if status == -1: return None, -1, None
     if status == 0: return map, 0, 0
@@ -220,7 +222,7 @@ def read_progress(src, templates):
     full_progress_rect = list(FULL_PROGRESS_RECT)
     full_progress_rect[1] += dy
 
-    img = crop(src, t_progress_rect)
+    img = utils.crop(src, t_progress_rect)
     # Find symbol location
     template, mask = templates['symbol'][status]
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
@@ -241,7 +243,7 @@ def read_progress(src, templates):
         template, mask = templates[num][status]
         w_digit_1 = PERCENT_RECTS[num][status][2]
         digit_1_rect = (t_progress_rect[0]+dx-w_digit_1-padx, t_progress_rect[1], w_digit_1+padx*2, t_progress_rect[3])
-        img_digit_1 = crop(src, digit_1_rect)
+        img_digit_1 = utils.crop(src, digit_1_rect)
         img_digit_1_scaled = cv2.resize(img_digit_1, None, fx=RATIO, fy=RATIO)
         res = cv2.matchTemplate(img_digit_1_scaled, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_1_scores.append((num, np.max(res)))
@@ -256,7 +258,7 @@ def read_progress(src, templates):
         w_digit_2 = PERCENT_RECTS[num][status][2]
         w_digit_1 = PERCENT_RECTS[digit_1][status][2]
         digit_2_rect = (t_progress_rect[0]+dx-w_digit_2-w_digit_1-padx+1, t_progress_rect[1], w_digit_2+padx*2, t_progress_rect[3])
-        img_digit_2 = crop(src, digit_2_rect)
+        img_digit_2 = utils.crop(src, digit_2_rect)
         img_digit_2_scaled = cv2.resize(img_digit_2, None, fx=RATIO, fy=RATIO)
         res = cv2.matchTemplate(img_digit_2_scaled, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_2_scores.append((num, np.max(res)))
@@ -270,30 +272,166 @@ def read_progress(src, templates):
 
     return map, status, percent
 
+# save_templates()
 templates = read_tempaltes()
 
 def process_status(img):
     status, map, loc = read_status(img, templates)
 
-    img = crop(img, STATUS_RECT)
+    img = utils.crop(img, STATUS_RECT)
     return '{}{}'.format(
-        val_to_string(map),
-        val_to_string(status)
+        utils.val_to_string(map),
+        utils.val_to_string(status)
     ), img
 
 def process_progress(img):
-    img_full_progress = crop(img, FULL_PROGRESS_RECT)
+    img_full_progress = utils.crop(img, FULL_PROGRESS_RECT)
 
     map, status, percent = read_progress(img, templates)
 
     return '{} {} {}'.format(
-        val_to_string(map),
-        val_to_string(status),
-        val_to_string(percent)
+        utils.val_to_string(map),
+        utils.val_to_string(status),
+        utils.val_to_string(percent)
     ), img_full_progress
 
-# save_templates()
-# tempaltes = read_tempaltes()
+def save_data(start, end, code):
+    obj = {
+        'type':'control',
+        'map': [],
+        'status': [],
+        'progress': {
+            1: [],
+            2: []
+        }
+    }
 
-# read_batch(process_status, start=4)
-read_batch(process_progress, start=0, num_height=16)
+    for src, frame in utils.read_frames(start=start, end=end, code=code):
+        map, status, percent = read_progress(src, templates)
+
+        obj['map'].append(map)
+        obj['status'].append(status)
+
+        if status is None or status < 1:
+            obj['progress'][1].append(None)
+            obj['progress'][2].append(None)
+        else:
+            if status == 1:
+                obj['progress'][1].append(percent)
+                obj['progress'][2].append(None)
+            else:
+                obj['progress'][1].append(None)
+                obj['progress'][2].append(percent)
+
+        print('Frame {:d} analyzed'.format(frame))
+
+    utils.save_data('obj', obj, start, end, code)
+
+def refine(code):
+    obj = utils.load_data('obj',0,None,code)
+
+    obj['status'] = utils.remove_none(obj['status'],2)
+
+    # Extend map range
+    breaks = [0]
+    for i in range(len(obj['status'])):
+        if obj['status'][i-1] == 0 and obj['status'][i] is None:
+            breaks.append(i)
+    breaks.append(i)
+
+    for i in range(1,len(breaks)):
+        map = obj['map'][int((breaks[i]+breaks[i-1])/2)]
+        for j in range(breaks[i-1], breaks[i]):
+            if obj['status'][j] is not None:
+                obj['map'][j] = map
+
+    # Fill 0 percent
+    captured = False
+    for i in range(len(obj['status'])):
+        if obj['status'][i] is None:
+            # Reset captured between map and initial scene
+            captured = False
+            continue
+
+        if obj['status'][i] == -1:
+            # Point locked
+            obj['progress']['1'][i] = 0
+            obj['progress']['2'][i] = 0
+
+        if not captured and obj['status'][i] == 0:
+            # Point not captured yet
+            obj['progress']['1'][i] = 0
+            obj['progress']['2'][i] = 0
+
+        if obj['status'][i] > 0:
+            captured = True
+
+    # Fill the point percent when other team is holding the point
+    progress_1, progress_2 = None, None
+    for i in range(len(obj['status'])):
+        if obj['status'][i] is None or obj['status'][i] < 1:
+            # Point not captured yet
+            progress_1, progress_2 = None, None
+
+        if progress_1 is not None: obj['progress']['1'][i] = progress_1
+        if progress_2 is not None: obj['progress']['2'][i] = progress_2
+
+        if obj['status'][i] == 0 and obj['status'][i+1] == 2:
+            # Point just captured by team 2
+            progress_1 = 0
+            progress_2 = None
+
+        if obj['status'][i] == 0 and obj['status'][i+1] == 1:
+            # Point just captured by team 1
+            progress_1 = None
+            progress_2 = 0
+
+        if obj['status'][i] == 1 and obj['status'][i+1] == 2:
+            # Point flipped by team 2
+            progress_1 = obj['progress']['1'][i]
+            progress_2 = None
+        if obj['status'][i] == 2 and obj['status'][i+1] == 1:
+            # Point flipped by team 1
+            progress_1 = None
+            progress_2 = obj['progress']['2'][i]
+
+    # Fill 100 percent
+    point_team = 0
+    progress_other_team = 0
+    for i in range(len(obj['status'])):
+        if obj['status'][i] is None:
+            # Reset captured between map and initial scene
+            point_team = 0
+            continue
+
+        if point_team > 0 and obj['status'][i] == 0:
+            # Point finished(uncaptured)
+            obj['progress'][str(point_team)][i] = 100
+            other_team = 1 if point_team == 2 else 2
+            obj['progress'][str(other_team)][i] = progress_other_team
+
+        if obj['status'][i] > 0:
+            point_team = obj['status'][i]
+            other_team = 1 if obj['status'][i] == 2 else 2
+            progress_other_team = obj['progress'][str(other_team)][i]
+
+    # plt.figure('status')
+    # plt.plot(obj['status'])
+    #
+    # def map_to_int(data):
+    #     map = {'a': 1, 'b': 2, 'c': 3, None: 0}
+    #     return [map[d] for d in data]
+    # plt.figure('map')
+    # plt.plot(map_to_int(obj['map']))
+    #
+    # plt.figure('progress')
+    # plt.plot(obj['progress']['1'])
+    # plt.plot(obj['progress']['2'])
+    # plt.show()
+
+    utils.save_data('obj_final', obj, 0, None, code)
+
+# utils.read_batch(process_status, start=4)
+# utils.read_batch(process_progress, start=0, num_height=16)
+# save_data(0,None,'nepal')
+# refine('nepal')

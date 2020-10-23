@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import json
-import os
+import matplotlib.pyplot as plt
 
 import utils
 
@@ -174,7 +174,7 @@ def read_ult(src, rect, templates):
     #     cv2.imshow('img', img_digit_1)
     #     cv2.waitKey(0)
     digit_1 = digit_1_scores[0][0]
-    if digit_1_scores[0][1] < ULT_THRESHOLD:
+    if digit_1_scores[0][1] < ULT_THRESHOLD or np.isnan(digit_1_scores[0][1]):
         return None
 
     digit_2_scores = []
@@ -194,7 +194,8 @@ def read_ult(src, rect, templates):
     #     cv2.imshow('img', img_digit_2)
     #     cv2.waitKey(0)
     digit_2 = digit_2_scores[0][0]
-    if digit_2_scores[0][1] < ULT_THRESHOLD: digit_2 = 0
+    if digit_2_scores[0][1] < ULT_THRESHOLD or np.isnan(digit_2_scores[0][1]):
+        digit_2 = 0
 
     percent = digit_2*10+digit_1
 
@@ -207,7 +208,7 @@ def read_ults(src, rects, templates):
 
     return percents
 
-save_templates()
+# save_templates()
 rects = read_rects()
 templates = read_tempaltes()
 
@@ -244,7 +245,7 @@ def process_ults(src):
 
     return ''.join(percents), img
 
-def save_ults(start=0, end=None, code='nepal'):
+def save_ults(start, end, code):
     ults = {}
     for player in range(1,13):
         ults[player] = []
@@ -260,13 +261,22 @@ def save_ults(start=0, end=None, code='nepal'):
         end_frame = frame
         print('Frame {:d} analyzed'.format(frame))
 
-    file_path = os.path.join(
-        utils.data_path(code),
-        'ults_{}_{:d}_{:d}.json'.format(code, start_frame, end_frame)
-    )
-    with open(file_path, 'w') as json_file:
-      json.dump(ults, json_file)
+    with open(utils.file_path('ults', start_frame, end_frame, code), 'w') as json_file:
+        json.dump(ults, json_file)
 
+def load_ults(start, end, code):
+    if end is None:
+        end = utils.count_frames(code)-1
+    with open(utils.file_path('ults', start*30, end*30, code)) as f:
+        ults = json.load(f)
+
+    return ults
 # utils.read_batch(process_ult, start=0, map='volskaya', length=731, num_width=16, num_height=16)
-# utils.read_batch(process_ults, start=0, map='volskaya', length=731, num_width=3, num_height=24)
-# save_ults(start=0, end=None, code='volskaya')
+# utils.read_batch(process_ults, start=11, map='nepal', length=835, num_width=3, num_height=24)
+# save_ults(0, None, 'nepal')
+ults = load_ults(0,None,'nepal')
+for player in ults:
+    plt.subplot(12, 1, int(player))
+    plt.plot(ults[player])
+plt.ylabel('ult')
+plt.show()

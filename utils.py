@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import json
 
 DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'data')
 IMG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'img')
@@ -70,6 +71,27 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
+# def remove_spikes(src, window_size):
+#     data = src.copy()
+#     i = 0
+#     while(i+window_size < len(data)):
+#         delta_data = data[i+1:i+window_size]-data[i:i+window_size-1]
+#         change_total = np.sum(np.absolute(delta_data))
+#         change_net = np.absolute(np.sum(delta_data))
+#         if change_net < change_total*0.1:
+#             data[i+1:i+window_size-1] = (data[i]+data[i+window_size-1])/2
+#         i += 1
+
+def remove_none(src, size=1):
+    data = np.array(src)
+    for i in range(len(data)-size):
+        if data[i] is None: continue
+
+        if np.any(data[i+1:i+size+1] == None) and data[i+size+1] is not None:
+            data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+
+    return data.tolist()
+
 def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
     shape = None
     for i in range(start,int(length/num_width/num_height)+1):
@@ -112,6 +134,12 @@ def img_path(code):
 
     return path
 
+def file_path(type, start_frame, end_frame, code):
+    return os.path.join(
+        data_path(code),
+        '{}_{}_{:d}_{:d}.json'.format(code, type, start_frame, end_frame)
+    )
+
 def count_frames(code='nepal'):
     path = os.path.join(IMG_FOLDER_PATH, code)
     return len(next(os.walk(path))[2])
@@ -129,3 +157,17 @@ def read_frames(start=0, end=None, code='nepal'):
         yield img, frame
 
     return
+
+def save_data(type, data, start, end, code):
+    if end is None: end = count_frames(code)-1
+
+    with open(file_path(type, start*30, end*30, code), 'w') as json_file:
+        json.dump(data, json_file)
+
+def load_data(type, start, end, code):
+    if end is None: end = count_frames(code)-1
+
+    with open(file_path(type, start*30, end*30, code)) as f:
+        data = json.load(f)
+
+    return data
