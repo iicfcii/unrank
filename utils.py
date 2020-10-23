@@ -1,5 +1,9 @@
 import cv2
 import numpy as np
+import os
+
+DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'data')
+IMG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'img')
 
 def val_to_string(val):
     if val is None: return 'NA'
@@ -91,3 +95,37 @@ def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_heigh
         img_final = cv2.vconcat(imgs_row, num_height)
         cv2.imshow('read', img_final)
         cv2.waitKey(0)
+
+def data_path(code):
+    path = os.path.join(DATA_FOLDER_PATH, code)
+
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    return path
+
+def img_path(code):
+    path = os.path.join(IMG_FOLDER_PATH, code)
+
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+    return path
+
+def count_frames(code='nepal'):
+    path = os.path.join(IMG_FOLDER_PATH, code)
+    return len(next(os.walk(path))[2])
+
+def read_frames(start=0, end=None, code='nepal'):
+    i = start
+    if end is None: end = count_frames(code)
+
+    while i == start or i < end:
+        frame = i*30
+        img = cv2.imread('img/'+code+'/'+code+'_'+str(frame)+'.jpg', cv2.IMREAD_COLOR)
+        assert img is not None
+
+        i += 1
+        yield img, frame
+
+    return

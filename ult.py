@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
+import json
+import os
 
-from utils import crop, match_color, read_batch, val_to_string
+import utils
 
 RATIO = 2.0
 
@@ -45,48 +47,48 @@ ULT_7_MASK = np.array([
 
 def save_templates():
     img = cv2.imread('img/volskaya/volskaya_1590.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_0_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_0_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_1620.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_1_2.jpg', crop(img, ULT_1_2_RECT))
+    cv2.imwrite('template/ult_1_2.jpg', utils.crop(img, ULT_1_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_1800.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_2_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_2_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_1860.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_3_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_3_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_1950.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_4_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_4_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_2250.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_5_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_5_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_1980.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_6_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_6_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_2010.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_7_2.jpg', crop(img, ULT_7_2_RECT))
+    cv2.imwrite('template/ult_7_2.jpg', utils.crop(img, ULT_7_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_2070.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_8_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_8_2.jpg', utils.crop(img, ULT_0_2_RECT))
     img = cv2.imread('img/volskaya/volskaya_3630.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_9_2.jpg', crop(img, ULT_0_2_RECT))
+    cv2.imwrite('template/ult_9_2.jpg', utils.crop(img, ULT_0_2_RECT))
 
     img = cv2.imread('img/volskaya/volskaya_1620.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_0_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_0_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_1710.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_1_1.jpg', crop(img, ULT_1_1_RECT))
+    cv2.imwrite('template/ult_1_1.jpg', utils.crop(img, ULT_1_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_1740.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_2_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_2_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_1860.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_3_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_3_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_3810.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_4_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_4_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_2160.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_5_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_5_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_4560.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_6_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_6_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_4740.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_7_1.jpg', crop(img, ULT_7_1_RECT))
+    cv2.imwrite('template/ult_7_1.jpg', utils.crop(img, ULT_7_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_4770.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_8_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_8_1.jpg', utils.crop(img, ULT_0_1_RECT))
     img = cv2.imread('img/volskaya/volskaya_4620.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/ult_9_1.jpg', crop(img, ULT_0_1_RECT))
+    cv2.imwrite('template/ult_9_1.jpg', utils.crop(img, ULT_0_1_RECT))
 
-    # cv2.imshow('img', crop(img, ULT_0_1_RECT))
+    # cv2.imshow('img', utils.crop(img, ULT_0_1_RECT))
     # cv2.waitKey(0)
 
 def read_tempaltes():
@@ -162,7 +164,7 @@ def read_ult(src, rect, templates):
         w_digit_1 = int(template.shape[1]/RATIO)
         # Offset to the left a bit because of digit 1 is not exactly at the right of the rect
         digit_1_rect = (rect[0]+rect[2]-w_digit_1-padx-3, rect[1], w_digit_1+padx*2, rect[3])
-        img_digit_1 = crop(src, digit_1_rect)
+        img_digit_1 = utils.crop(src, digit_1_rect)
         img_digit_1 = cv2.resize(img_digit_1, None, fx=RATIO, fy=RATIO)
         res = cv2.matchTemplate(img_digit_1, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_1_scores.append((num, np.max(res)))
@@ -182,7 +184,7 @@ def read_ult(src, rect, templates):
         w_digit_1 = int(templates[digit_1][team][0].shape[1]/RATIO)
         # Offset to the left is smaller because the digits are tilted(two rects have overlap)
         digit_2_rect = (rect[0]+rect[2]-w_digit_1-w_digit_2-2, rect[1], w_digit_2+padx*2, rect[3])
-        img_digit_2 = crop(src, digit_2_rect)
+        img_digit_2 = utils.crop(src, digit_2_rect)
         img_digit_2 = cv2.resize(img_digit_2, None, fx=RATIO, fy=RATIO)
         res = cv2.matchTemplate(img_digit_2, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         digit_2_scores.append((num, np.max(res)))
@@ -198,6 +200,13 @@ def read_ult(src, rect, templates):
 
     return percent
 
+def read_ults(src, rects, templates):
+    percents = []
+    for player in rects:
+        percents.append(read_ult(src, rects[player], templates))
+
+    return percents
+
 save_templates()
 rects = read_rects()
 templates = read_tempaltes()
@@ -211,16 +220,17 @@ def process_ult(src):
     rect[1] -= padding
     rect[2] += padding*2
     rect[3] += padding*2
-    img = crop(src, rect)
+    img = utils.crop(src, rect)
 
     return '{}'.format(
-        val_to_string(percent),
+        utils.val_to_string(percent),
     ), img
 
 def process_ults(src):
-    imgs = []
-    percents = []
+    percents = read_ults(src, rects, templates)
+    percents = ['{:<6}'.format(utils.val_to_string(p)) for p in percents]
 
+    imgs = []
     for player in rects:
         rect = list(rects[player])
         padding = 8
@@ -229,13 +239,34 @@ def process_ults(src):
         rect[2] += padding*2
         rect[3] += padding*2
 
-        imgs.append(crop(src, rect))
-        percents.append(read_ult(src, rects[player], templates))
-
-    percents = ['{:<6}'.format(val_to_string(p)) for p in percents]
+        imgs.append(utils.crop(src, rect))
     img = cv2.hconcat(imgs, 12)
 
     return ''.join(percents), img
 
-# read_batch(process_ult, start=0, map='volskaya', length=731, num_width=16, num_height=16)
-read_batch(process_ults, start=0, map='volskaya', length=731, num_width=3, num_height=24)
+def save_ults(start=0, end=None, code='nepal'):
+    ults = {}
+    for player in range(1,13):
+        ults[player] = []
+
+    start_frame = None
+    for src, frame in utils.read_frames(start=start, end=end, code=code):
+        percents = read_ults(src, rects, templates)
+
+        for i, percent in enumerate(percents):
+            ults[i+1].append(percent)
+
+        if start_frame is None: start_frame = frame
+        end_frame = frame
+        print('Frame {:d} analyzed'.format(frame))
+
+    file_path = os.path.join(
+        utils.data_path(code),
+        'ults_{}_{:d}_{:d}.json'.format(code, start_frame, end_frame)
+    )
+    with open(file_path, 'w') as json_file:
+      json.dump(ults, json_file)
+
+# utils.read_batch(process_ult, start=0, map='volskaya', length=731, num_width=16, num_height=16)
+# utils.read_batch(process_ults, start=0, map='volskaya', length=731, num_width=3, num_height=24)
+# save_ults(start=0, end=None, code='volskaya')
