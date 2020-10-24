@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
-from utils import crop, match_color, read_batch, val_to_string
+import utils
 
 PROGRESS_RECT = (592,71,96,46)
 PROGRESS_RECT_1 = (592,71,46,46)
@@ -27,22 +28,22 @@ TEAM2_COLOR_UB = TEAM2_COLOR+TEAM2_COLOR_RANGE
 
 def save_templates():
     img = cv2.imread('img/hanamura/hanamura_660.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_locked.jpg', crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assult_locked.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_captured.jpg', crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assult_captured.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_3240.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_A_1.jpg', crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assult_A_1.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_12060.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_A_2.jpg', crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assult_A_2.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_B_1.jpg', crop(img, ICON_RECT_2))
+    cv2.imwrite('template/assult_B_1.jpg', utils.crop(img, ICON_RECT_2))
 
     img = cv2.imread('img/hanamura/hanamura_18240.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_B_2.jpg', crop(img, ICON_RECT_2))
+    cv2.imwrite('template/assult_B_2.jpg', utils.crop(img, ICON_RECT_2))
 
 def read_tempaltes():
     templates = {}
@@ -85,7 +86,7 @@ def read_status(src, templates):
         else:
             progress_rect = PROGRESS_RECT_2
 
-        img = crop(src, progress_rect)
+        img = utils.crop(src, progress_rect)
 
         scores = []
         template, mask = templates['locked']
@@ -120,9 +121,9 @@ def read_point(img_progress, center, team):
     img_progress[mask == 0] = (0,0,0)
 
     if team == 1:
-        img_match = match_color(img_progress, TEAM2_COLOR_LB, TEAM2_COLOR_UB)
+        img_match = utils.match_color(img_progress, TEAM2_COLOR_LB, TEAM2_COLOR_UB)
     else:
-        img_match = match_color(img_progress, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
+        img_match = utils.match_color(img_progress, TEAM1_COLOR_LB, TEAM1_COLOR_UB)
     img_match = cv2.morphologyEx(img_match, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2,2)), iterations=1, borderValue=0)
 
     # Convert all valid pixles to angle
@@ -150,7 +151,7 @@ def read_point(img_progress, center, team):
 def read_progress(src, templates):
     status_a, loc_a, status_b, loc_b = read_status(src, templates)
 
-    img_full_progress = crop(src, PROGRESS_RECT)
+    img_full_progress = utils.crop(src, PROGRESS_RECT)
     if status_a is None or status_b is None: return None, None, None
     # if point a is locked, point b must be locked
     if status_a == -1: return None, -1, -1
@@ -176,7 +177,7 @@ def read_progress(src, templates):
         dy = 14
     else:
         dy = 10
-    img_progress = crop(src, progress_rect[point])
+    img_progress = utils.crop(src, progress_rect[point])
     center = (int(progress_rect[point][2]/2), int(progress_rect[point][3]/2+(dy-ICON_RECT_1[1]+progress_rect[point][1])))
     percent = read_point(img_progress, center, team[point])
     if percent is not None: progress[point] = percent
@@ -188,11 +189,11 @@ templates = read_tempaltes()
 
 def process_status(src):
     status_a, loc_a, status_b, loc_b = read_status(src, templates)
-    img = crop(src, PROGRESS_RECT)
+    img = utils.crop(src, PROGRESS_RECT)
 
     return '{} {}'.format(
-        val_to_string(status_a),
-        val_to_string(status_b)
+        utils.val_to_string(status_a),
+        utils.val_to_string(status_b)
     ), img
 
 def mark_progress(img, progress, dx, dy):
@@ -208,7 +209,7 @@ def mark_progress(img, progress, dx, dy):
 
 def process_progress(src):
     team, progress_A, progress_B = read_progress(src, templates)
-    img_full_progress = crop(src, PROGRESS_RECT)
+    img_full_progress = utils.crop(src, PROGRESS_RECT)
 
     mark_progress(
         img_full_progress,
@@ -225,10 +226,49 @@ def process_progress(src):
     )
 
     return '{} {} {}'.format(
-        val_to_string(team),
-        val_to_string(progress_A),
-        val_to_string(progress_B)
+        utils.val_to_string(team),
+        utils.val_to_string(progress_A),
+        utils.val_to_string(progress_B)
     ), img_full_progress
 
-# read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
-# read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
+def save(start, end, code):
+    obj = {
+        'type':'assult',
+        'status': [],
+        'progress': {
+            'A': [],
+            'B': []
+        }
+    }
+
+    for src, frame in utils.read_frames(start=start, end=end, code=code):
+        team, progress_A, progress_B = read_progress(src, templates)
+        obj['status'].append(team)
+        obj['progress']['A'].append(progress_A)
+        obj['progress']['B'].append(progress_B)
+        print('Frame {:d} analyzed'.format(frame))
+
+    utils.save_data('obj', obj, start, end, code)
+
+def refine(code):
+    obj = utils.load_data('obj',0,None,code)
+
+    obj['status'] = utils.remove_outlier(obj['status'],2)
+    for point in ['A', 'B']:
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number'])
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['change'])
+
+    plt.figure('obj')
+    plt.subplot(3,1,1)
+    plt.plot(obj['status'])
+    plt.subplot(3,1,2)
+    plt.plot(obj['progress']['A'])
+    plt.subplot(3,1,3)
+    plt.plot(obj['progress']['B'])
+    plt.show()
+
+# utils.read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
+# utils.read_batch(process_progress, map='hanamura', length=1623, start=5, num_width=12, num_height=16)
+# save(0, None, 'hanamura')
+refine('hanamura')

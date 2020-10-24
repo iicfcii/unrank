@@ -355,8 +355,8 @@ def refine(code):
 
         if obj['status'][i] == -1:
             # Point locked
-            obj['progress']['1'][i] = 0
-            obj['progress']['2'][i] = 0
+            obj['progress']['1'][i] = -1
+            obj['progress']['2'][i] = -1
 
         if not captured and obj['status'][i] == 0:
             # Point not captured yet
@@ -419,7 +419,7 @@ def refine(code):
     plt.plot(obj['status'])
 
     def map_to_int(data):
-        map = {'a': 1, 'b': 2, 'c': 3, None: 0}
+        map = {'a': 1, 'b': 2, 'c': 3, None: None}
         return [map[d] for d in data]
     plt.figure('map')
     plt.plot(map_to_int(obj['map']))

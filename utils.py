@@ -71,20 +71,37 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
-def remove_outlier(src, size=1):
+def remove_outlier(src, size=1, types=['none','number','change']):
     data = np.array(src)
-    for i in range(len(data)-size):
-        # number None number
-        if np.any(data[i+1:i+size+1] == None) and \
-           data[i] is not None and \
-           data[i+size+1] is not None:
-            data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
-        # None number None
-        if np.any(data[i+1:i+size+1] != None) and \
-           data[i] is None and \
-           data[i+size+1] is None:
-            data[i+1:i+size+1] = None
-        # TODO: small Large small
+
+    def remove(type):
+        for i in range(len(data)-size):
+            if ( # number None number
+                type == 'none' and
+                np.any(data[i+1:i+size+1] == None) and
+                data[i] is not None and
+                data[i+size+1] is not None
+            ):
+                data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+            if ( # None number None
+                type == 'number' and
+                np.any(data[i+1:i+size+1] != None) and
+                data[i+size+1] is None
+            ):
+                data[i+1:i+size+1] = None
+            if ( # small Large small
+                type == 'change' and
+                np.all(data[i:i+size+2] != None) # All numbers
+            ):
+                d = data[i+1:i+size+2]-data[i:i+size+1]
+                d_total = np.sum(np.absolute(d))
+                d_net = np.absolute(np.sum(d))
+                if d_net < d_total*0.3:
+                    print(i)
+                    data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+
+    for type in types:
+        remove(type)
 
     return data.tolist()
 
