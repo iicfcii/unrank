@@ -71,24 +71,20 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
-# def remove_spikes(src, window_size):
-#     data = src.copy()
-#     i = 0
-#     while(i+window_size < len(data)):
-#         delta_data = data[i+1:i+window_size]-data[i:i+window_size-1]
-#         change_total = np.sum(np.absolute(delta_data))
-#         change_net = np.absolute(np.sum(delta_data))
-#         if change_net < change_total*0.1:
-#             data[i+1:i+window_size-1] = (data[i]+data[i+window_size-1])/2
-#         i += 1
-
-def remove_none(src, size=1):
+def remove_outlier(src, size=1):
     data = np.array(src)
     for i in range(len(data)-size):
-        if data[i] is None: continue
-
-        if np.any(data[i+1:i+size+1] == None) and data[i+size+1] is not None:
+        # number None number
+        if np.any(data[i+1:i+size+1] == None) and \
+           data[i] is not None and \
+           data[i+size+1] is not None:
             data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+        # None number None
+        if np.any(data[i+1:i+size+1] != None) and \
+           data[i] is None and \
+           data[i+size+1] is None:
+            data[i+1:i+size+1] = None
+        # TODO: small Large small
 
     return data.tolist()
 

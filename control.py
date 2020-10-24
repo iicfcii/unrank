@@ -295,7 +295,7 @@ def process_progress(img):
         utils.val_to_string(percent)
     ), img_full_progress
 
-def save_data(start, end, code):
+def save(start, end, code):
     obj = {
         'type':'control',
         'map': [],
@@ -330,7 +330,7 @@ def save_data(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_none(obj['status'],2)
+    obj['status'] = utils.remove_outlier(obj['status'],2)
 
     # Extend map range
     breaks = [0]
@@ -415,23 +415,23 @@ def refine(code):
             other_team = 1 if obj['status'][i] == 2 else 2
             progress_other_team = obj['progress'][str(other_team)][i]
 
-    # plt.figure('status')
-    # plt.plot(obj['status'])
-    #
-    # def map_to_int(data):
-    #     map = {'a': 1, 'b': 2, 'c': 3, None: 0}
-    #     return [map[d] for d in data]
-    # plt.figure('map')
-    # plt.plot(map_to_int(obj['map']))
-    #
-    # plt.figure('progress')
-    # plt.plot(obj['progress']['1'])
-    # plt.plot(obj['progress']['2'])
-    # plt.show()
+    plt.figure('status')
+    plt.plot(obj['status'])
 
-    utils.save_data('obj_final', obj, 0, None, code)
+    def map_to_int(data):
+        map = {'a': 1, 'b': 2, 'c': 3, None: 0}
+        return [map[d] for d in data]
+    plt.figure('map')
+    plt.plot(map_to_int(obj['map']))
+
+    plt.figure('progress')
+    plt.plot(obj['progress']['1'])
+    plt.plot(obj['progress']['2'])
+    plt.show()
+
+    utils.save_data('obj_r', obj, 0, None, code)
 
 # utils.read_batch(process_status, start=4)
 # utils.read_batch(process_progress, start=0, num_height=16)
-# save_data(0,None,'nepal')
+# save(0,None,'nepal')
 # refine('nepal')

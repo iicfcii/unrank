@@ -7,7 +7,7 @@ import utils
 
 RATIO = 2.0
 
-ULT_THRESHOLD = 0.6
+ULT_THRESHOLD = 0.7
 ULT_RECT_1 = (33,52,24,20)
 ULT_RECT_7 = (828,52,24,20)
 ULT_RECT_X_OFFSET = 71
@@ -245,38 +245,48 @@ def process_ults(src):
 
     return ''.join(percents), img
 
-def save_ults(start, end, code):
-    ults = {}
+def save(start, end, code):
+    ult = {}
     for player in range(1,13):
-        ults[player] = []
+        ult[player] = []
 
     start_frame = None
     for src, frame in utils.read_frames(start=start, end=end, code=code):
         percents = read_ults(src, rects, templates)
 
         for i, percent in enumerate(percents):
-            ults[i+1].append(percent)
+            ult[i+1].append(percent)
 
         if start_frame is None: start_frame = frame
         end_frame = frame
         print('Frame {:d} analyzed'.format(frame))
 
-    with open(utils.file_path('ults', start_frame, end_frame, code), 'w') as json_file:
-        json.dump(ults, json_file)
+    utils.save_data('ult', ult, start, end, code)
 
-def load_ults(start, end, code):
-    if end is None:
-        end = utils.count_frames(code)-1
-    with open(utils.file_path('ults', start*30, end*30, code)) as f:
-        ults = json.load(f)
+def refine(code):
+    obj = utils.load_data('obj_r',0,None,code)
+    ult = utils.load_data('ult',0,None,code)
 
-    return ults
-# utils.read_batch(process_ult, start=0, map='volskaya', length=731, num_width=16, num_height=16)
-# utils.read_batch(process_ults, start=11, map='nepal', length=835, num_width=3, num_height=24)
-# save_ults(0, None, 'nepal')
-ults = load_ults(0,None,'nepal')
-for player in ults:
-    plt.subplot(12, 1, int(player))
-    plt.plot(ults[player])
-plt.ylabel('ult')
-plt.show()
+    for player in range(1,13):
+        player = str(player)
+        ult[player] = utils.remove_outlier(ult[player], size=2)
+
+    for player in range(1,13):
+        player = str(player)
+        for i in range(len(ult[player])):
+            if ult[player][i] is None and obj['status'][i] is not None:
+                ult[player][i] = 100
+
+    plt.figure('progress')
+    plt.plot(obj['progress']['1'])
+    plt.plot(obj['progress']['2'])
+    plt.figure('ult')
+    for player in range(7,13):
+        plt.subplot(6,1,player-6)
+        plt.plot(ult[str(player)])
+    plt.show()
+
+    utils.save_data('ult_r', ult, 0, None, code)
+# utils.read_batch(process_ults, start=2, map='nepal', length=835, num_width=3, num_height=24)
+# save(0, None, 'nepal')
+refine('nepal')
