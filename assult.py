@@ -254,7 +254,8 @@ def process_progress(src):
 def save(start, end, code):
     obj = {
         'type':'assult',
-        'team': [],
+        'status': [],
+        'capturing': [],
         'progress': {
             'A': [],
             'B': []
@@ -262,8 +263,12 @@ def save(start, end, code):
     }
 
     for src, frame in utils.read_frames(start=start, end=end, code=code):
-        team, progress_A, progress_B = read_progress(src, templates)
-        obj['team'].append(team)
+        status, progress_A, progress_B = read_progress(src, templates)
+
+        team = int(np.floor(status)) if status is not None else None
+        capturing = int(10*(status-team)) if status is not None else None
+        obj['status'].append(team)
+        obj['capturing'].append(capturing)
         obj['progress']['A'].append(progress_A)
         obj['progress']['B'].append(progress_B)
         print('Frame {:d} analyzed'.format(frame))
@@ -273,21 +278,63 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['team'] = utils.remove_outlier(obj['team'],2,['none','number'])
-    obj['team'] = utils.remove_outlier(obj['team'],1,['change'])
+    obj['status'] = utils.remove_outlier(obj['status'],2,['none','number'])
+    obj['capturing'] = utils.remove_outlier(obj['capturing'],2,['none','number'])
+    obj['capturing'] = utils.remove_outlier(obj['capturing'],1,['change'])
     for point in ['A', 'B']:
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number'])
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number','change'])
         obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['change'])
 
-    plt.figure('obj')
-    plt.subplot(3,1,1)
-    plt.plot(obj['team'])
-    plt.subplot(3,1,2)
-    plt.plot(obj['progress']['A'])
-    plt.subplot(3,1,3)
-    plt.plot(obj['progress']['B'])
-    plt.show()
+    # Fill not capturing
+    for i in range(len(obj['capturing'])):
+        if obj['progress']['A'][i] is None and obj['progress']['B'][i] is None:
+            continue
+
+        if obj['capturing'][i] is None:
+            obj['capturing'][i] = 0
+
+    # Fill locked
+    for i in range(len(obj['capturing'])):
+        if (
+            obj['progress']['A'][i] == -1 or
+            (obj['progress']['A'][i] == 100 and obj['progress']['B'][i] == 100) or
+            (obj['progress']['A'][i] == 100 and obj['progress']['B'][i] == -1)
+        ):
+            obj['status'][i] = -1
+
+    # Remove progress increase whihle not capturing point
+    for i in range(len(obj['capturing'])):
+        # 3 consecutive not capturing means no progress increase
+        if np.any(obj['capturing'][i-2:i+1]) != 0: continue
+
+        for point in ['A', 'B']:
+            if (
+                obj['progress'][point][i] is None or
+                obj['progress'][point][i-1] is None
+            ):
+                continue
+
+            if (
+                # can still go from -1 to 0
+                # and allow minor change due to detection error
+                obj['progress'][point][i]-obj['progress'][point][i-1] > 2 and
+                # not capturing point when reaching 100
+                obj['progress'][point][i] != 100
+            ):
+                obj['progress'][point][i] = obj['progress'][point][i-1]
+
+    # plt.figure('obj')
+    # plt.subplot(4,1,1)
+    # plt.plot(obj['status'])
+    # plt.subplot(4,1,2)
+    # plt.plot(obj['capturing'])
+    # plt.subplot(4,1,3)
+    # plt.plot(obj['progress']['A'])
+    # plt.subplot(4,1,4)
+    # plt.plot(obj['progress']['B'])
+    # plt.show()
+
+    utils.save_data('obj_r', obj, 0, None, code)
 
 # utils.read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
 # utils.read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
@@ -295,3 +342,5 @@ def refine(code):
 # refine('hanamura')
 # save(0, None, 'volskaya')
 # refine('volskaya')
+# save(0, None, 'anubis')
+# refine('anubis')

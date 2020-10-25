@@ -71,7 +71,7 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
-def remove_outlier(src, size=1, types=['none','number','change']):
+def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4):
     data = np.array(src)
 
     def remove(type):
@@ -91,15 +91,17 @@ def remove_outlier(src, size=1, types=['none','number','change']):
             ):
                 data[i+1:i+size+1] = None
             if ( # small Large small
-                type == 'change' and
+                (type == 'change' or type == 'up' or type == 'down') and
                 np.all(data[i:i+size+2] != None) # All numbers
             ):
                 d = data[i+1:i+size+2]-data[i:i+size+1]
                 d_total = np.sum(np.absolute(d))
                 d_net = np.absolute(np.sum(d))
-                if d_net < d_total*0.3:
-                    print(i)
-                    data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+                if d_net < d_total*threshold:
+                    # Get max 2 absolute values and use the one with smaller index
+                    up = d[np.amin(np.argsort(np.abs(d))[-2:])] > 0
+                    if (type == 'up' and up) or (type == 'down' and not up) or type =='change':
+                        data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
 
     for type in types:
         remove(type)
