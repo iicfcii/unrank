@@ -267,6 +267,9 @@ def refine(code):
     obj = utils.load_data('obj_r',0,None,code)
     ult = utils.load_data('ult',0,None,code)
 
+    # Remove data when black screen(status is None)
+    utils.extend_none(obj['status'], [ult[str(p)] for p in range(1,13)], size=0)
+
     for player in range(1,13):
         player = str(player)
         ult[player] = utils.remove_outlier(ult[player], size=2)
@@ -279,7 +282,6 @@ def refine(code):
         # Remove resurrect, up and almost returns to original percent
         ult[player] = utils.remove_outlier(ult[player], size=4, types=['up'], threshold=0.3)
 
-
     ult_src = utils.load_data('ult',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
@@ -290,12 +292,10 @@ def refine(code):
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(ult[str(player)])
-        # plt.plot(ult_src[str(player)],'.')
     plt.figure('ult team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(ult[str(player)])
-        # plt.plot(ult_src[str(player)],'.')
     plt.show()
 
     utils.save_data('ult_r', ult, 0, None, code)
@@ -303,4 +303,6 @@ def refine(code):
 # save(0, None, 'nepal')
 # refine('nepal')
 # save(0, None, 'volskaya')
-refine('volskaya')
+# refine('volskaya')
+# save(0, None, 'hanamura')
+# refine('hanamura')

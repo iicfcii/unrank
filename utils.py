@@ -99,6 +99,7 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4)
                 d_net = np.absolute(np.sum(d))
                 if d_net < d_total*threshold:
                     # Get max 2 absolute values and use the one with smaller index
+                    # to determine sudden change direction
                     up = d[np.amin(np.argsort(np.abs(d))[-2:])] > 0
                     if (type == 'up' and up) or (type == 'down' and not up) or type =='change':
                         data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
@@ -107,6 +108,29 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4)
         remove(type)
 
     return data.tolist()
+
+
+def extend_none(mask, datas, size=1, type='both'): # 'left' 'right'
+    if size == 0:
+        for i in range(size, len(mask), 1):
+            if mask[i] is None:
+                for data in datas:
+                    data[i] = None
+        return
+
+    if type == 'left' or type == 'both':
+        for i in range(size, len(mask), 1):
+            if mask[i] is None and mask[i-1] is not None:
+                mask[i-size:i] = [None]*size
+                for data in datas:
+                    data[i-size:i] = [None]*size
+
+    if type == 'right' or type == 'both':
+        for i in range(len(mask)-size-1, -1, -1):
+            if mask[i] is None and mask[i+1] is not None:
+                mask[i+1:i+1+size] = [None]*size
+                for data in datas:
+                    data[i+1:i+1+size] = [None]*size
 
 def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
     shape = None

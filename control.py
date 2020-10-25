@@ -415,6 +415,14 @@ def refine(code):
             other_team = 1 if obj['status'][i] == 2 else 2
             progress_other_team = obj['progress'][str(other_team)][i]
 
+    # Remove one frame before entering black screen
+    utils.extend_none(obj['status'], [
+        obj['status'],
+        obj['map'],
+        obj['progress']['1'],
+        obj['progress']['2']
+    ], type='left')
+
     plt.figure('status')
     plt.plot(obj['status'])
 

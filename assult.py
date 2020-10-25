@@ -323,6 +323,14 @@ def refine(code):
             ):
                 obj['progress'][point][i] = obj['progress'][point][i-1]
 
+    # Remove one frame before entering black screen
+    utils.extend_none(obj['status'], [
+        obj['status'],
+        obj['capturing'],
+        obj['progress']['A'],
+        obj['progress']['B']
+    ], type='left')
+
     # plt.figure('obj')
     # plt.subplot(4,1,1)
     # plt.plot(obj['status'])
