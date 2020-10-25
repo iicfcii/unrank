@@ -86,6 +86,7 @@ def remove_outlier(src, size=1, types=['none','number','change']):
             if ( # None number None
                 type == 'number' and
                 np.any(data[i+1:i+size+1] != None) and
+                data[i] is None and
                 data[i+size+1] is None
             ):
                 data[i+1:i+size+1] = None

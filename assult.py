@@ -15,6 +15,11 @@ ICON_MASK = np.array([[ICON_RECT_1[2]/2, 2],
                       [ICON_RECT_1[2]/2, ICON_RECT_1[3]-2],
                       [2, ICON_RECT_1[3]/2]], dtype=np.int32)
 ICON_THRESHOLD = 0.6 # NOTE: A,B icon change size a bit when point is contesting
+TEXT_RECT = (18,17,10,11)
+TEXT_THRESHOLD = {
+    1: {'A':187,'B':182},
+    2: {'A':179,'B':175}
+}
 
 TEAM1_COLOR = np.array((85, 150, 255)) # HSV, RGB 67, 212, 255
 TEAM1_COLOR_RANGE = np.array((20, 120, 40))
@@ -109,6 +114,23 @@ def read_status(src, templates):
         score = scores[0]
         # print(point, scores)
         if score[2] > ICON_THRESHOLD:
+            # Detect capturing
+            if score[0] > 0:
+                loc = score[1]
+                dy = 14 if loc[0] > 11 else 10
+                img_text = utils.crop(img, (
+                    TEXT_RECT[0],
+                    TEXT_RECT[1]+(dy-ICON_RECT_1[1]+progress_rect[1]),
+                    TEXT_RECT[2],
+                    TEXT_RECT[3]
+                ))
+                img_text = cv2.cvtColor(img_text, cv2.COLOR_BGR2HSV)
+                # print(np.mean(img_text[:,:,2]))
+                if np.mean(img_text[:,:,2]) < TEXT_THRESHOLD[score[0]][point]:
+                    score = (score[0]+0.1, scores[1], score[2])
+                # cv2.imshow('text', img_text[:,:,2])
+                # cv2.waitKey(0)
+
             status[point] = (score[0], (score[1][1],score[1][0]))
         else:
             status[point] = (None, None, None)
@@ -160,7 +182,8 @@ def read_progress(src, templates):
 
     progress = {'A': 0, 'B': 0}
     loc = {'A': loc_a, 'B': loc_b}
-    team = {'A': status_a, 'B': status_b} # Status indicates defending team, 1 or 2
+    status = {'A': status_a, 'B': status_b} # Status indicates defending team, 1 or 2
+    team = {'A': np.floor(status_a), 'B': np.floor(status_b)} # Status indicates defending team, 1 or 2
     progress_rect = {'A': PROGRESS_RECT_1, 'B': PROGRESS_RECT_2}
     if status_a > 0:
         # Must be capturing point a
@@ -173,16 +196,13 @@ def read_progress(src, templates):
 
     # Overtime will offset in y direction
     # print(loc[point][1])
-    if loc[point][1] > 11:
-        dy = 14
-    else:
-        dy = 10
+    dy = 14 if loc[point][1] > 11 else 10
     img_progress = utils.crop(src, progress_rect[point])
     center = (int(progress_rect[point][2]/2), int(progress_rect[point][3]/2+(dy-ICON_RECT_1[1]+progress_rect[point][1])))
     percent = read_point(img_progress, center, team[point])
     if percent is not None: progress[point] = percent
 
-    return team[point], progress['A'], progress['B']
+    return status[point], progress['A'], progress['B']
 
 save_templates()
 templates = read_tempaltes()
@@ -254,6 +274,7 @@ def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
     obj['team'] = utils.remove_outlier(obj['team'],2,['none','number'])
+    obj['team'] = utils.remove_outlier(obj['team'],1,['change'])
     for point in ['A', 'B']:
         obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number'])
         obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
@@ -268,7 +289,9 @@ def refine(code):
     plt.plot(obj['progress']['B'])
     plt.show()
 
-# utils.read_batch(process_status, map='hanamura', length=1623, start=2, num_width=12, num_height=16)
-# utils.read_batch(process_progress, map='hanamura', length=1623, start=1, num_width=12, num_height=16)
+# utils.read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
+# utils.read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
 # save(0, None, 'hanamura')
-refine('hanamura')
+# refine('hanamura')
+# save(0, None, 'volskaya')
+# refine('volskaya')
