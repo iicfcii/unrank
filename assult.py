@@ -33,17 +33,25 @@ def save_templates():
     img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_captured.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_3240.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('img/hanamura/hanamura_3120.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_A_1.jpg', utils.crop(img, ICON_RECT_1))
+    img = cv2.imread('img/hanamura/hanamura_3390.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/assult_A_cap_1.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_12060.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('img/hanamura/hanamura_11130.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_A_2.jpg', utils.crop(img, ICON_RECT_1))
+    img = cv2.imread('img/hanamura/hanamura_23370.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/assult_A_cap_2.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('img/hanamura/hanamura_5040.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_B_1.jpg', utils.crop(img, ICON_RECT_2))
+    img = cv2.imread('img/hanamura/hanamura_6990.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/assult_B_cap_1.jpg', utils.crop(img, ICON_RECT_2))
 
-    img = cv2.imread('img/hanamura/hanamura_18240.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('img/hanamura/hanamura_15600.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assult_B_2.jpg', utils.crop(img, ICON_RECT_2))
+    img = cv2.imread('img/hanamura/hanamura_17370.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/assult_B_cap_2.jpg', utils.crop(img, ICON_RECT_2))
 
 def read_tempaltes():
     templates = {}
@@ -66,9 +74,17 @@ def read_tempaltes():
             mask = cv2.fillConvexPoly(mask, ICON_MASK, 255)
             templates[point][team] = (img, mask)
 
+    for point in ['A', 'B']:
+        templates[point+'cap'] = {}
+        for team in [1,2]:
+            img = cv2.imread('template/assult_'+point+'_cap_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
+            mask = np.zeros((img.shape[0],img.shape[1]), dtype=np.uint8)
+            mask = cv2.fillConvexPoly(mask, ICON_MASK, 255)
+            templates[point+'cap'][team] = (img, mask)
+
     # img_locked[mask_locked == 0] = (0,0,0)
     # img_captured[mask_captured == 0] = (0,0,0)
-    # temp, mask = templates['A'][2]
+    # temp, mask = templates['Bcap'][1]
     # temp[mask == 0] = (0,0,0)
     # cv2.imshow('locked with mask', img_locked)
     # cv2.imshow('captured with mask', img_captured)
@@ -92,28 +108,35 @@ def read_status(src, templates):
         template, mask = templates['locked']
         res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         loc = np.unravel_index(np.argmax(res), res.shape)
-        scores.append((-1, loc, res[loc]))
+        scores.append((-1, None, loc, res[loc]))
 
         template, mask = templates['captured']
         res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         loc = np.unravel_index(np.argmax(res), res.shape)
-        scores.append((0, loc, res[loc]))
+        scores.append((0, None, loc, res[loc]))
 
         for team in [1,2]:
             template, mask = templates[point][team]
             res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
             loc = np.unravel_index(np.argmax(res), res.shape)
-            scores.append((team, loc, res[loc])) # defender team
+            scores.append((team, False, loc, res[loc])) # defender team
 
-        scores.sort(reverse=True, key=lambda m:m[2])
+        # NOTE: May mismatch not capping
+        for team in [1,2]:
+            template, mask = templates[point+'cap'][team]
+            res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
+            loc = np.unravel_index(np.argmax(res), res.shape)
+            scores.append((team, True, loc, res[loc])) # defender team
+
+        scores.sort(reverse=True, key=lambda m:m[3])
         score = scores[0]
         # print(point, scores)
-        if score[2] > ICON_THRESHOLD:
-            status[point] = (score[0], (score[1][1],score[1][0]))
+        if score[3] > ICON_THRESHOLD:
+            status[point] = (score[0], score[1], (score[2][1],score[2][0]))
         else:
-            status[point] = (None, None)
+            status[point] = (None, None, None)
 
-    return status['A'][0],status['A'][1],status['B'][0],status['B'][1]
+    return status['A'][0],status['A'][1],status['A'][2],status['B'][0],status['B'][1],status['B'][2]
 
 def read_point(img_progress, center, team):
     mask= np.zeros((img_progress.shape[0],img_progress.shape[1]), dtype=np.uint8)
@@ -149,7 +172,7 @@ def read_point(img_progress, center, team):
     return None
 
 def read_progress(src, templates):
-    status_a, loc_a, status_b, loc_b = read_status(src, templates)
+    status_a, cap_a, loc_a, status_b, cap_b, loc_b = read_status(src, templates)
 
     img_full_progress = utils.crop(src, PROGRESS_RECT)
     if status_a is None or status_b is None: return None, None, None
@@ -159,6 +182,7 @@ def read_progress(src, templates):
     if status_a == 0 and status_b == -1: return None, 100, -1
 
     progress = {'A': 0, 'B': 0}
+    cap = {'A':cap_a, 'B':cap_b}
     loc = {'A': loc_a, 'B': loc_b}
     team = {'A': status_a, 'B': status_b} # Status indicates defending team, 1 or 2
     progress_rect = {'A': PROGRESS_RECT_1, 'B': PROGRESS_RECT_2}
@@ -170,6 +194,10 @@ def read_progress(src, templates):
         # Must be capturing point b
         progress['A'] = 100
         point = 'B'
+
+    if not cap[point]:
+        progress[point] = None
+        return team[point], progress['A'], progress['B']
 
     # Overtime will offset in y direction
     # print(loc[point][1])
@@ -188,12 +216,14 @@ save_templates()
 templates = read_tempaltes()
 
 def process_status(src):
-    status_a, loc_a, status_b, loc_b = read_status(src, templates)
+    status_a, cap_a, loc_a, status_b, cap_b, loc_b = read_status(src, templates)
     img = utils.crop(src, PROGRESS_RECT)
 
-    return '{} {}'.format(
+    return '{} {:.2} {} {:.2}'.format(
         utils.val_to_string(status_a),
-        utils.val_to_string(status_b)
+        utils.val_to_string(cap_a),
+        utils.val_to_string(status_b),
+        utils.val_to_string(cap_b),
     ), img
 
 def mark_progress(img, progress, dx, dy):
@@ -253,11 +283,11 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],2)
-    for point in ['A', 'B']:
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number'])
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['change'])
+    # obj['status'] = utils.remove_outlier(obj['status'],2)
+    # for point in ['A', 'B']:
+    #     obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number'])
+    #     obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
+    #     obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['change'])
 
     plt.figure('obj')
     plt.subplot(3,1,1)
@@ -268,7 +298,7 @@ def refine(code):
     plt.plot(obj['progress']['B'])
     plt.show()
 
-# utils.read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
-# utils.read_batch(process_progress, map='hanamura', length=1623, start=5, num_width=12, num_height=16)
+# utils.read_batch(process_status, map='hanamura', length=1623, start=1, num_width=12, num_height=16)
+# utils.read_batch(process_progress, map='hanamura', length=1623, start=6, num_width=12, num_height=16)
 # save(0, None, 'hanamura')
 refine('hanamura')
