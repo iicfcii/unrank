@@ -250,15 +250,12 @@ def save(start, end, code):
     for player in range(1,13):
         ult[player] = []
 
-    start_frame = None
-    for src, frame in utils.read_frames(start=start, end=end, code=code):
+    for src, frame in utils.read_frames(start, end, code):
         percents = read_ults(src, rects, templates)
 
         for i, percent in enumerate(percents):
             ult[i+1].append(percent)
 
-        if start_frame is None: start_frame = frame
-        end_frame = frame
         print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('ult', ult, start, end, code)

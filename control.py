@@ -306,7 +306,7 @@ def save(start, end, code):
         }
     }
 
-    for src, frame in utils.read_frames(start=start, end=end, code=code):
+    for src, frame in utils.read_frames(start, end, code):
         map, status, percent = read_progress(src, templates)
 
         obj['map'].append(map)

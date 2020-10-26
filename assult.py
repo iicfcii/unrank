@@ -262,7 +262,7 @@ def save(start, end, code):
         }
     }
 
-    for src, frame in utils.read_frames(start=start, end=end, code=code):
+    for src, frame in utils.read_frames(start, end, code):
         status, progress_A, progress_B = read_progress(src, templates)
 
         team = int(np.floor(status)) if status is not None else None

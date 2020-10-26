@@ -184,7 +184,7 @@ def count_frames(code='nepal'):
     path = os.path.join(IMG_FOLDER_PATH, code)
     return len(next(os.walk(path))[2])
 
-def read_frames(start=0, end=None, code='nepal'):
+def read_frames(start, end, code):
     i = start
     if end is None: end = count_frames(code)
 
