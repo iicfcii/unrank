@@ -1,12 +1,14 @@
 import cv2
 import numpy as np
+import json
+import matplotlib.pyplot as plt
 
 import utils
 
 HERO_RECT_LEFT = (40,48,410,25)
 HERO_RECT_RIGHT = (835,48,410,25)
-HERO_RECT_1 = (75,48,21,25)
-HERO_RECT_7 = (864,48,21,25)
+HERO_RECT_1 = (75,48,15,25) # Cant be too wide otherwise discord will affect the match
+HERO_RECT_7 = (864,48,15,25)
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
@@ -88,7 +90,7 @@ def save_templates():
     cv2.imwrite('template/hero_mercy.jpg', utils.crop(img_1, offset_rect(rects[6], -3, 0)))
     cv2.imwrite('template/hero_doomfist.jpg', utils.crop(img_1, offset_rect(rects[7], -2, 0)))
     cv2.imwrite('template/hero_wreckingball.jpg', utils.crop(img_1, rects[10]))
-    cv2.imwrite('template/hero_ana.jpg', utils.crop(img_1, rects[11]))
+    cv2.imwrite('template/hero_ana.jpg', utils.crop(img_1, offset_rect(rects[11], -4, 0)))
 
     img_2 = cv2.imread('img/volskaya/volskaya_3900.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_soldier76.jpg', utils.crop(img_2, offset_rect(rects[3], -3, 0)))
@@ -156,6 +158,7 @@ def read_hero(src, rect, templates):
         scores.append((hero, np.max(res)))
 
     scores.sort(reverse=True, key=lambda s:s[1])
+    # print(scores)
     score = scores[0]
     if score[1] > HERO_THRESHOLD:
         return score[0]
@@ -169,6 +172,7 @@ def read_heroes(img, rects, templates):
 
     return heroes
 
+save_templates()
 rects = read_rects()
 templates = read_templates()
 
@@ -208,6 +212,61 @@ def save(start, end, code):
 
     utils.save_data('hero', hero, start, end, code)
 
+def refine(code):
+    obj = utils.load_data('obj_r',0,None,code)
+    hero = utils.load_data('hero',0,None,code)
+
+    utils.extend_none(obj['status'], [hero[str(p)] for p in range(1,13)], size=0)
+
+    for player in range(1,13):
+        player = str(player)
+        # Remove sudden changes, looser threshold because values are smaller
+        hero[player] = utils.remove_outlier(hero[player], size=3, threshold=0.5, interp=False)
+
+    # remove heroA -1 heroA (resurrected/hacked/discorded/dead...)
+    # remove heroA -1 heroB (hero change...)
+    SIZE = 10 # NOTE: may need to tune
+    for player in range(1,13):
+        hs = np.array(hero[str(player)]) # Convert to np array
+        for i in range(len(hs)-SIZE-1):
+            if (
+                hs[i] is not None and
+                hs[i] > -1 and
+                hs[i+SIZE+1] is not None and
+                hs[i+SIZE+1] > -1 and
+                np.any(hs[i+1:i+SIZE+1] == -1)
+            ):
+                hs[i+1:i+SIZE+1] = hs[i]
+
+        hero[str(player)] = list(hs) # Convert back to list
+
+    # fix player leaves
+
+    hero_src = utils.load_data('hero',0,None,code)
+    plt.figure('status')
+    plt.plot(obj['status'])
+    plt.figure('hero team 1')
+    for player in range(1,7):
+        plt.subplot(6,1,player)
+        plt.plot(hero[str(player)])
+        plt.plot(hero_src[str(player)], '.', markersize=1)
+    plt.figure('hero team 2')
+    for player in range(7,13):
+        plt.subplot(6,1,player-6)
+        plt.plot(hero[str(player)])
+        plt.plot(hero_src[str(player)], '.', markersize=1)
+    plt.show()
+
+    utils.save_data('hero_r', hero, 0, None, code)
+
 # utils.read_batch(process_hero, start=0, map='volskaya', length=731)
-# utils.read_batch(process_heroes, start=0, map='volskaya', length=731, num_width=2, num_height=32)
+# utils.read_batch(process_heroes, start=8, map='volskaya', length=731, num_width=2, num_height=32)
 # save(0, None, 'volskaya')
+# refine('volskaya')
+
+# save(0, None, 'nepal')
+# refine('nepal')
+
+# utils.read_batch(process_heroes, start=1, map='hanamura', length=1623, num_width=2, num_height=32)
+# save(0, None, 'hanamura')
+refine('hanamura')

@@ -71,11 +71,11 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
-def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4):
+def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4, interp=True):
     data = np.array(src)
 
     def remove(type):
-        for i in range(len(data)-size):
+        for i in range(len(data)-size-1):
             if ( # number None number
                 type == 'none' and
                 np.any(data[i+1:i+size+1] == None) and
@@ -102,7 +102,10 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4)
                     # to determine sudden change direction
                     up = d[np.amin(np.argsort(np.abs(d))[-2:])] > 0
                     if (type == 'up' and up) or (type == 'down' and not up) or type =='change':
-                        data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+                        if interp:
+                            data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+                        else:
+                            data[i+1:i+size+1] = data[i]
 
     for type in types:
         remove(type)
