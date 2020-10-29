@@ -7,8 +7,8 @@ import utils
 
 HERO_RECT_LEFT = (40,48,410,25)
 HERO_RECT_RIGHT = (835,48,410,25)
-HERO_RECT_1 = (75,48,15,25) # Cant be too wide otherwise discord will affect the match
-HERO_RECT_7 = (864,48,15,25)
+HERO_RECT_1 = (75,48,21,25) # Cant be too wide otherwise discord will affect the match
+HERO_RECT_7 = (864,48,21,25)
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
@@ -143,7 +143,13 @@ def read_templates():
     templates = {}
 
     for hero in HEROES:
-        templates[hero] = cv2.imread('template/hero_'+hero+'.jpg', cv2.IMREAD_COLOR)
+        img = cv2.imread('template/hero_'+hero+'.jpg', cv2.IMREAD_COLOR)
+        # Crop image to avoid discorded mismatch
+        # TODO: Can try a L shaped mask
+        templates[hero] = utils.crop(img, (0,0,12,img.shape[0]))
+
+    # cv2.imshow('hero', templates['hanzo'])
+    # cv2.waitKey(0)
 
     return templates
 
@@ -219,9 +225,8 @@ def refine(code):
     utils.extend_none(obj['status'], [hero[str(p)] for p in range(1,13)], size=0)
 
     for player in range(1,13):
-        player = str(player)
-        # Remove sudden changes, looser threshold because values are smaller
-        hero[player] = utils.remove_outlier(hero[player], size=3, threshold=0.5, interp=False)
+        # Remove sudden changes, loosen threshold because values are smaller
+        hero[str(player)] = utils.remove_outlier(hero[str(player)], size=3, threshold=0.5, interp=False)
 
     utils.fix_disconnect(code, hero, -1)
 

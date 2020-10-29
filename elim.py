@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 
-from utils import crop, match_color, read_batch, val_to_string, extract_locs, pad_rect
+import utils
 from hero import HEROES
 
 ELIM_RECT_1 = (46,92,18,10)
@@ -54,7 +54,7 @@ def read_rects():
 
     # img = cv2.imread('img/volskaya/volskaya_17400.jpg', cv2.IMREAD_COLOR)
     # img = cv2.imread('img/volskaya/volskaya_3030.jpg', cv2.IMREAD_COLOR)
-    # cv2.imshow('crop', crop(img, rects[1]))
+    # cv2.imshow('Crop', utils.crop(img, rects[1]))
     # for i in range(1,13):
     #     img_mark = cv2.rectangle(img, rects[i], (255,255,255), thickness=1)
     # cv2.imshow('img', img_mark)
@@ -66,22 +66,22 @@ def save_templates():
     rects = read_rects()
 
     img = cv2.imread('img/volskaya/volskaya_3060.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/elim_1.jpg', crop(img, rects[3]))
+    cv2.imwrite('template/elim_1.jpg', utils.crop(img, rects[3]))
 
     img = cv2.imread('img/volskaya/volskaya_15570.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/elim_7.jpg', crop(img, rects[12]))
+    cv2.imwrite('template/elim_7.jpg', utils.crop(img, rects[12]))
 
 def read_templates():
     templates = {}
 
     templates['symbol'] = {}
     img = cv2.imread('template/elim_1.jpg', cv2.IMREAD_COLOR)
-    img_match = match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
+    img_match = utils.match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
     img[img_match == 0] = (127,127,127) # Set to middle so that any color won't differ too much
     templates['symbol'][1] = img
 
     img = cv2.imread('template/elim_7.jpg', cv2.IMREAD_COLOR)
-    img_match = match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
+    img_match = utils.match_color(img, ELIM_COLOR_LB, ELIM_COLOR_UB)
     img[img_match == 0] = (127,127,127)
     templates['symbol'][7] = img
 
@@ -105,7 +105,7 @@ def read_status(src, rects, templates):
     # scores = []
 
     for p in rects:
-        img = crop(src, pad_rect(rects[p],2,0))
+        img = utils.crop(src, utils.pad_rect(rects[p],2,0))
         res = cv2.matchTemplate(img, templates['symbol'][1 if p < 7 else 7], cv2.TM_CCOEFF_NORMED)
         # scores.append(np.max(res))
         if np.max(res) > SYMBOL_THRESHOLD:
@@ -122,8 +122,8 @@ def determine_team(img_elim):
     b = 4 # border thickness
     img_elim[b:img_elim.shape[0]-b,:] = (0,0,0)
 
-    img_1 = match_color(img_elim, TEAM_1_COLOR_LB, TEAM_1_COLOR_UB)
-    img_2 = match_color(img_elim, TEAM_2_COLOR_LB, TEAM_2_COLOR_UB)
+    img_1 = utils.match_color(img_elim, TEAM_1_COLOR_LB, TEAM_1_COLOR_UB)
+    img_2 = utils.match_color(img_elim, TEAM_2_COLOR_LB, TEAM_2_COLOR_UB)
     sum_1 = np.sum(img_1)/255
     sum_2 = np.sum(img_2)/255
     if np.abs(sum_1-sum_2) < 10:
@@ -145,7 +145,7 @@ def determine_team(img_elim):
     return team
 
 def read_elims(src, rects, templates):
-    img = crop(src, ELIMS_RECT)
+    img = utils.crop(src, ELIMS_RECT)
     status = read_status(src, rects, templates)
     if np.sum(status) == 0: return None
 
@@ -164,7 +164,7 @@ def read_elims(src, rects, templates):
                 templates[hero].shape[1]/RATIO, # Use template width
                 29 # Height of elim rect
             ),dtype=np.int32)
-            img_elim = crop(img, rect_elim)
+            img_elim = utils.crop(img, rect_elim)
             team = determine_team(img_elim)
             heroes.append((hero, team, loc))
             if team is None: print('Not sure about', hero, 'team')
@@ -214,7 +214,7 @@ def process_status(src):
 
     imgs = []
     for p in rects:
-        imgs.append(crop(src, pad_rect(rects[p],1,10)))
+        imgs.append(utils.crop(src, utils.pad_rect(rects[p],1,10)))
 
     status = ['{:<3d}'.format(s) for s in status]
 
@@ -235,6 +235,6 @@ def process_elims(src):
 
     return ' '.join(heroes_str), img
 
-# read_batch(process_status, start=1, map='volskaya', length=731, num_width=3, num_height=16)
-read_batch(process_elims, start=0, map='volskaya', length=731, num_width=5, num_height=4)
-# read_batch(process_elims, start=0, map='rialto', length=470, num_width=5, num_height=4)
+utils.read_batch(process_status, start=1, map='volskaya', length=731, num_width=3, num_height=16)
+# utils.read_batch(process_elims, start=10, map='volskaya', length=731, num_width=5, num_height=4)
+# utils.read_batch(process_elims, start=0, map='rialto', length=470, num_width=5, num_height=4)

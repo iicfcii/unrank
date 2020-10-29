@@ -154,6 +154,12 @@ def fix_disconnect(code, data, value):
     obj = load_data('obj_r',0,None,code)
     hero = load_data('hero',0,None,code)
 
+    # Clean up the source hero data a bit
+    extend_none(obj['status'], [hero[str(p)] for p in range(1,13)], size=0)
+    for player in range(1,13):
+        # Remove sudden changes, loosen threshold because values are smaller
+        hero[str(player)] = remove_outlier(hero[str(player)], size=3, threshold=0.5, interp=False)
+
     DISCONNECT_SIZE = 12 # NOTE: may need to tune
     # Find potential disconnects
     dcs = []

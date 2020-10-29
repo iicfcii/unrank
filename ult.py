@@ -268,9 +268,8 @@ def refine(code):
     utils.extend_none(obj['status'], [ult[str(p)] for p in range(1,13)], size=0)
 
     for player in range(1,13):
-        player = str(player)
         # ult can become 100(None) at i frame and then 0 at i+1 frame
-        ult[player] = utils.remove_outlier(ult[player], types=['number, change'], size=2, threshold=0.2)
+        ult[str(player)] = utils.remove_outlier(ult[str(player)], types=['number', 'change'], size=1, threshold=0.2)
 
     utils.fix_disconnect(code, ult, 0)
 
@@ -309,5 +308,7 @@ def refine(code):
 # refine('nepal')
 # save(0, None, 'volskaya')
 # refine('volskaya')
+
+# utils.read_batch(process_ults, start=18, map='hanamura', length=1623, num_width=3, num_height=24)
 # save(0, None, 'hanamura')
 # refine('hanamura')
