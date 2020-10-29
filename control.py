@@ -441,5 +441,5 @@ def refine(code):
 
 # utils.read_batch(process_status, start=4)
 # utils.read_batch(process_progress, start=0, num_height=16)
-# save(0,None,'nepal')
-# refine('nepal')
+save(0,None,'nepal')
+refine('nepal')

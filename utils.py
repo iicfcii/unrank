@@ -71,7 +71,9 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
-def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4, interp=True):
+# min: minimum value when removing upward sudden change
+# max: maximum value when removing downward sudden change
+def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4, min=None, max=None, interp=True):
     data = np.array(src)
 
     def remove(type):
@@ -94,6 +96,20 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
                 (type == 'change' or type == 'up' or type == 'down') and
                 np.all(data[i:i+size+2] != None) # All numbers
             ):
+                if (
+                    min is not None and
+                    (type == 'up' or type=='change') and
+                    np.all(data[i:i+size+2] < min)
+                ):
+                    continue
+
+                if (
+                    max is not None and
+                    (type == 'down' or type=='change') and
+                    np.all(data[i:i+size+2] > max)
+                ):
+                    continue
+
                 d = data[i+1:i+size+2]-data[i:i+size+1]
                 d_total = np.sum(np.absolute(d))
                 d_net = np.absolute(np.sum(d))
@@ -111,7 +127,6 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
         remove(type)
 
     return data.tolist()
-
 
 def extend_none(mask, datas, size=1, type='both'): # 'left' 'right'
     if size == 0:
@@ -134,6 +149,72 @@ def extend_none(mask, datas, size=1, type='both'): # 'left' 'right'
                 mask[i+1:i+1+size] = [None]*size
                 for data in datas:
                     data[i+1:i+1+size] = [None]*size
+
+def fix_disconnect(code, data, value):
+    obj = load_data('obj_r',0,None,code)
+    hero = load_data('hero',0,None,code)
+
+    DISCONNECT_SIZE = 12 # NOTE: may need to tune
+    # Find potential disconnects
+    dcs = []
+    i = 0
+    while i < len(obj['status'])-DISCONNECT_SIZE-1:
+        # Skip point locked or black screen
+        if obj['status'][i] == -1 or obj['status'][i] is None:
+            i += 1
+            continue
+
+        for player in range(1,13):
+            hs = np.array(hero[str(player)]) # Convert to np array
+            if np.all(hs[i:i+DISCONNECT_SIZE] == -1):
+                start = i
+                end = i+DISCONNECT_SIZE
+                while end < len(hs):
+                    if np.all(hs[i+DISCONNECT_SIZE:end] == -1):
+                        end += 1
+                    else:
+                        end -= 1
+                        break
+
+                dcs.append((1 if player < 7 else 2, start, end))
+                i = end - 1
+
+        i += 1
+    dcs = list(set(dcs)) # Remove duplicates
+
+    # Find the player who disconnects
+    dcs_r = []
+    for dc in dcs:
+        team, start, end = dc
+        # Beginning and end of match does not count
+        if start < 40: continue
+        if start > len(obj['status'])-10: continue
+
+        heroes_current = []
+        heroes_prev = []
+        for p in range((team-1)*6+1,team*6+1):
+            heroes_current.append(hero[str(p)][start])
+            heroes_prev.append(hero[str(p)][start-1])
+        # print(team, heroes_prev, heroes_current)
+
+        for i in range(6):
+            # NOTE: Assume no hero switch happens exactly when someone leaves
+            if heroes_prev[i] not in heroes_current:
+                dcs_r.append(((team-1)*6+i+1, team, start, end)) # player, team, start, end
+    dcs_r = list(set(dcs_r)) # Remove duplicates
+
+    if len(dcs_r) > 0: print('Player disconnection happens', dcs_r)
+
+    # Adjust data accordingly
+    for dc in dcs_r:
+        player, team, start, end = dc
+        for i in range(start, end):
+            for p in range((team-1)*6+1,team*6+1):
+                if p < player:
+                    data[str(p)][i] = data[str(p+1)][i]
+
+                if p == player:
+                    data[str(p)][i] = value
 
 def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
     shape = None

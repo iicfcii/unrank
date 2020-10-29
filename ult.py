@@ -269,7 +269,10 @@ def refine(code):
 
     for player in range(1,13):
         player = str(player)
-        ult[player] = utils.remove_outlier(ult[player], size=2)
+        # ult can become 100(None) at i frame and then 0 at i+1 frame
+        ult[player] = utils.remove_outlier(ult[player], types=['number, change'], size=2, threshold=0.2)
+
+    utils.fix_disconnect(code, ult, 0)
 
     for player in range(1,13):
         player = str(player)
@@ -277,23 +280,28 @@ def refine(code):
             if ult[player][i] is None and obj['status'][i] is not None:
                 ult[player][i] = 100
         # Remove resurrect, up and almost returns to original percent
-        ult[player] = utils.remove_outlier(ult[player], size=4, types=['up'], threshold=0.3)
+        ult[player] = utils.remove_outlier(ult[player], size=4, types=['up'], threshold=0.3, min=100)
 
-    # ult_src = utils.load_data('ult',0,None,code)
-    # plt.figure('status')
-    # plt.plot(obj['status'])
-    # plt.figure('progress')
-    # for key in obj['progress']:
-    #     plt.plot(obj['progress'][key])
-    # plt.figure('ult team 1')
-    # for player in range(1,7):
-    #     plt.subplot(6,1,player)
-    #     plt.plot(ult[str(player)])
-    # plt.figure('ult team 2')
-    # for player in range(7,13):
-    #     plt.subplot(6,1,player-6)
-    #     plt.plot(ult[str(player)])
-    # plt.show()
+    ult_src = utils.load_data('ult',0,None,code)
+    plt.figure('status')
+    plt.plot(obj['status'])
+
+    plt.figure('progress')
+    for key in obj['progress']:
+        plt.plot(obj['progress'][key])
+
+    plt.figure('ult team 1')
+    for player in range(1,7):
+        plt.subplot(6,1,player)
+        plt.plot(ult[str(player)])
+        plt.plot(ult_src[str(player)], '.', markersize=1)
+
+    plt.figure('ult team 2')
+    for player in range(7,13):
+        plt.subplot(6,1,player-6)
+        plt.plot(ult[str(player)])
+        plt.plot(ult_src[str(player)], '.', markersize=1)
+    plt.show()
 
     utils.save_data('ult_r', ult, 0, None, code)
 # utils.read_batch(process_ults, start=2, map='nepal', length=835, num_width=3, num_height=24)

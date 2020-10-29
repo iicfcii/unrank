@@ -223,24 +223,24 @@ def refine(code):
         # Remove sudden changes, looser threshold because values are smaller
         hero[player] = utils.remove_outlier(hero[player], size=3, threshold=0.5, interp=False)
 
+    utils.fix_disconnect(code, hero, -1)
+
     # remove heroA -1 heroA (resurrected/hacked/discorded/dead...)
     # remove heroA -1 heroB (hero change...)
-    SIZE = 10 # NOTE: may need to tune
+    EFFECT_SIZE = 10 # NOTE: may need to tune
     for player in range(1,13):
         hs = np.array(hero[str(player)]) # Convert to np array
-        for i in range(len(hs)-SIZE-1):
+        for i in range(len(hs)-EFFECT_SIZE-1):
             if (
                 hs[i] is not None and
                 hs[i] > -1 and
-                hs[i+SIZE+1] is not None and
-                hs[i+SIZE+1] > -1 and
-                np.any(hs[i+1:i+SIZE+1] == -1)
+                hs[i+EFFECT_SIZE+1] is not None and
+                hs[i+EFFECT_SIZE+1] > -1 and
+                np.any(hs[i+1:i+EFFECT_SIZE+1] == -1)
             ):
-                hs[i+1:i+SIZE+1] = hs[i]
+                hs[i+1:i+EFFECT_SIZE+1] = hs[i]
 
         hero[str(player)] = list(hs) # Convert back to list
-
-    # fix player leaves
 
     hero_src = utils.load_data('hero',0,None,code)
     plt.figure('status')
@@ -269,4 +269,4 @@ def refine(code):
 
 # utils.read_batch(process_heroes, start=1, map='hanamura', length=1623, num_width=2, num_height=32)
 # save(0, None, 'hanamura')
-refine('hanamura')
+# refine('hanamura')
