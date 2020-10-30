@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import time
+import matplotlib.pyplot as plt
 
 import utils
 from hero import HEROES
@@ -134,7 +134,7 @@ def determine_team(img_elim):
         # cv2.waitKey(0)
         return None # Diff between red and blue are too small
 
-    team = np.argmax([sum_1,sum_2])+1
+    team = int(np.argmax([sum_1,sum_2])+1)
 
     # print(sum_1, sum_2, team)
     # cv2.imshow('Src', img_elim)
@@ -147,14 +147,14 @@ def determine_team(img_elim):
 def read_elims(src, rects, templates):
     img = utils.crop(src, ELIMS_RECT)
     status = read_status(src, rects, templates)
-    if np.sum(status) == 0: return None
+    if np.sum(status) == 0: return status, []
 
     img_scaled = cv2.resize(img, None, fx=RATIO, fy=RATIO)
 
     heroes = []
     for hero in HEROES:
         res = cv2.matchTemplate(img_scaled, templates[hero], cv2.TM_CCOEFF_NORMED)
-        locations = extract_locs(res, ELIM_THRESHOLD, DIST_THRESHOLD)
+        locations = utils.extract_locs(res, ELIM_THRESHOLD, DIST_THRESHOLD)
 
         for loc in locations:
             # Crop unscaled image
@@ -181,7 +181,7 @@ def read_elims(src, rects, templates):
         if not added:
             heroes_rows[y] = [hero]
 
-    heroes_organized = []
+    elims = []
     for y in sorted(list(heroes_rows.keys()), key=lambda k:k):
         heroes_row = heroes_rows[y]
         if len(heroes_row) > 2:
@@ -192,18 +192,16 @@ def read_elims(src, rects, templates):
             heroes_row.sort(key=lambda h:h[2][0])
             if heroes_row[0][1] != None and heroes_row[1][1] != None: # Ignore hero without team
                 if heroes_row[0][1] != heroes_row[1][1]: # Ignore mercy resurrect
-                    heroes_organized.append([h[0:2] for h in heroes_row])
+                    elims.append([h[0:2] for h in heroes_row])
 
         if len(heroes_row) == 1:
             h = heroes_row[0]
             if h[1] is not None and h[2][0] > 350: # Suicide with known team
-                heroes_organized.append([h[0:2]])
+                elims.append([h[0:2]])
             else:
                 print('Only one hero found in this row')
 
-    if len(heroes_organized) == 0: heroes_organized = None
-
-    return heroes_organized
+    return status, elims
 
 save_templates()
 templates = read_templates()
@@ -221,20 +219,148 @@ def process_status(src):
     return ''.join(status), cv2.hconcat(imgs, 12)
 
 def process_elims(src):
-    img = crop(src, ELIMS_RECT)
-    heroes = read_elims(src, rects, templates)
+    img = utils.crop(src, ELIMS_RECT)
+    status, elims = read_elims(src, rects, templates)
 
-    if heroes is None: return 'NA', img
+    if len(elims) == 0: return 'NA', img
 
-    heroes_str = []
-    for hs in heroes:
-        if len(hs) == 1:
-            heroes_str.append('{:.3}{:d}'.format(hs[0][0],hs[0][1]))
+    elims_str = []
+    for elim in elims:
+        if len(elim) == 1:
+            elims_str.append('{:.3}{:d}'.format(elim[0][0],elim[0][1]))
         else:
-            heroes_str.append('{:.3}{:d}-{:.3}{:d}'.format(hs[0][0],hs[0][1],hs[1][0],hs[1][1]))
+            elims_str.append('{:.3}{:d}-{:.3}{:d}'.format(elim[0][0],elim[0][1],elim[1][0],elim[1][1]))
 
-    return ' '.join(heroes_str), img
+    return ' '.join(elims_str), img
 
-utils.read_batch(process_status, start=1, map='volskaya', length=731, num_width=3, num_height=16)
-# utils.read_batch(process_elims, start=10, map='volskaya', length=731, num_width=5, num_height=4)
+def save(start, end, code):
+    health = {}
+    elim = {
+        'heroes': HEROES,
+        'data': [],
+    }
+
+    for player in range(1,13):
+        health[player] = []
+
+    for src, frame in utils.read_frames(start, end, code):
+        status, elims = read_elims(src, rects, templates)
+
+        for i, value in enumerate(status):
+            health[i+1].append(1 if value == 0 else 0)
+
+        elims_frame = []
+        if len(elims) > 0:
+            for e in elims:
+                if len(e) == 2:
+                    elims_frame.append([
+                        [HEROES.index(e[0][0]), e[0][1]],
+                        [HEROES.index(e[1][0]), e[1][1]]
+                    ])
+                else:
+                    elims_frame.append([
+                        None,
+                        [HEROES.index(e[0][0]), e[0][1]]
+                    ])
+
+        elim['data'].append(elims_frame)
+        print('Frame {:d} analyzed'.format(frame))
+
+    utils.save_data('health', health, start, end, code)
+    utils.save_data('elim', elim, start, end, code)
+
+def refine(code):
+    obj = utils.load_data('obj_r',0,None,code)
+    hero = utils.load_data('hero_r',0,None,code)
+    health = utils.load_data('health',0,None,code)
+    elim = utils.load_data('elim',0,None,code)
+
+    # Clean health data
+    utils.extend_none(obj['status'], [health[str(p)] for p in range(1,13)], size=0)
+    for player in range(1,13):
+        health[str(player)] = utils.remove_outlier(health[str(player)],size=1)
+    utils.fix_disconnect(code, health, None)
+
+
+    # Find all the deaths for each player
+    death = {}
+    for player in range(1,13):
+        death[player] = []
+        h = health[str(player)]
+        start = None
+        for i in range(1, len(h)):
+            if h[i] == 0 and h[i-1] == 1:
+                start = i
+
+            if h[i] == 1 and h[i-1] == 0:
+                death[player].append((start, i))
+                start = None
+
+            if start is not None and h[i] is None:
+                death[player].append((start, i))
+                start = None
+
+    # print(death)
+    elim_new = {'heroes': HEROES}
+    for player in range(1,13):
+        elim_new[str(player)] = [None]*len(health[str(player)])
+        for d in death[player]:
+            start, end = d
+            team = 1 if player < 7 else 2
+
+            # NOTE: echo ult kill shows echo but hero shows duplicated hero.
+            # No effect here because echo ulting won't die
+            hs_self = list(set(hero[str(player)][start:end]))
+            assert len(hs_self) == 1
+            h_self = hs_self[0] # current hero
+
+            h_opp = -1
+
+            for es in elim['data'][start:end]:
+                if len(es) == 0: continue
+                if h_opp != -1: break
+
+                for e in es:
+                    if h_self == e[1][0] and team == e[1][1]:
+                        if e[0] is not None:
+                            h_opp = e[0][0]
+                        else:
+                            h_opp = None
+                        break
+
+            assert h_opp != -1
+            elim_new[str(player)][start] = (h_self, h_opp)
+
+    elim = elim_new
+
+    health_src = utils.load_data('health',0,None,code)
+    elim_src = utils.load_data('elim',0,None,code)
+
+    def elim_to_int(elim):
+        return [None if e is None else e[1] for e in elim]
+
+    plt.figure('team 1')
+    for player in range(1,7):
+        plt.subplot(6,1,player)
+        plt.plot(health[str(player)])
+        plt.plot(health_src[str(player)],'.', markersize=1)
+        plt.plot(elim_to_int(elim[str(player)]),'v')
+
+    plt.figure('team 2')
+    for player in range(7,13):
+        plt.subplot(6,1,player-6)
+        plt.plot(health[str(player)])
+        plt.plot(health_src[str(player)],'.', markersize=1)
+        plt.plot(elim_to_int(elim[str(player)]),'v')
+    plt.show()
+
+    utils.save_data('health_r', health, 0, None, code)
+    utils.save_data('elim_r', elim, 0, None, code)
+
+# utils.read_batch(process_status, start=0, map='volskaya', length=731, num_width=3, num_height=16)
+# utils.read_batch(process_elims, start=20, map='volskaya', length=731, num_width=5, num_height=4)
 # utils.read_batch(process_elims, start=0, map='rialto', length=470, num_width=5, num_height=4)
+# save(0,None,'volskaya')
+# refine('volskaya')
+# save(0,None,'hanamura')
+# refine('hanamura')
