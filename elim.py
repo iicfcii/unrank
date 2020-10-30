@@ -300,17 +300,16 @@ def refine(code):
                 death[player].append((start, i))
                 start = None
 
-    # print(death)
     elim_new = {'heroes': HEROES}
-    for player in range(1,13):
-        elim_new[str(player)] = [None]*len(health[str(player)])
-        for d in death[player]:
+    for p in range(1,13):
+        elim_new[str(p)] = [None]*len(health[str(p)])
+        for d in death[p]:
             start, end = d
-            team = 1 if player < 7 else 2
+            team = 1 if p < 7 else 2
 
             # NOTE: echo ult kill shows echo but hero shows duplicated hero.
             # No effect here because echo ulting won't die
-            hs_self = list(set(hero[str(player)][start:end]))
+            hs_self = list(set(hero[str(p)][start:end]))
             assert len(hs_self) == 1
             h_self = hs_self[0] # current hero
 
@@ -329,29 +328,27 @@ def refine(code):
                         break
 
             assert h_opp != -1
-            elim_new[str(player)][start] = (h_self, h_opp)
+
+            elim_new[str(p)][start] = h_opp
 
     elim = elim_new
 
     health_src = utils.load_data('health',0,None,code)
     elim_src = utils.load_data('elim',0,None,code)
 
-    def elim_to_int(elim):
-        return [None if e is None else e[1] for e in elim]
-
     plt.figure('team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
-        plt.plot(elim_to_int(elim[str(player)]),'v')
+        plt.plot(elim[str(player)],'v')
 
     plt.figure('team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
-        plt.plot(elim_to_int(elim[str(player)]),'v')
+        plt.plot(elim[str(player)],'v')
     plt.show()
 
     utils.save_data('health_r', health, 0, None, code)
