@@ -18,13 +18,13 @@ SYMBOL_THRESHOLD = 0.38
 
 # NOTE: tune tighter so that won't make mistake
 # Elim will appear on multiple frames to make up the missed ones
-TEAM_1_COLOR = np.array((100, 150, 200)) #HSV
-TEAM_1_COLOR_RANGE = np.array((20, 100, 60))
+TEAM_1_COLOR = np.array((100, 127, 127)) #HSV
+TEAM_1_COLOR_RANGE = np.array((60, 128, 128))
 TEAM_1_COLOR_LB = TEAM_1_COLOR-TEAM_1_COLOR_RANGE
 TEAM_1_COLOR_UB = TEAM_1_COLOR+TEAM_1_COLOR_RANGE
 
 TEAM_2_COLOR = np.array((170, 150, 160)) #HSV
-TEAM_2_COLOR_RANGE = np.array((20, 50, 50))
+TEAM_2_COLOR_RANGE = np.array((20, 100, 100))
 TEAM_2_COLOR_LB = TEAM_2_COLOR-TEAM_2_COLOR_RANGE
 TEAM_2_COLOR_UB = TEAM_2_COLOR+TEAM_2_COLOR_RANGE
 
@@ -102,42 +102,36 @@ def read_templates():
 
 def read_status(src, rects, templates):
     status = []
-    # scores = []
 
     for p in rects:
         img = utils.crop(src, utils.pad_rect(rects[p],2,0))
         res = cv2.matchTemplate(img, templates['symbol'][1 if p < 7 else 7], cv2.TM_CCOEFF_NORMED)
-        # scores.append(np.max(res))
         if np.max(res) > SYMBOL_THRESHOLD:
             status.append(1)
         else:
             status.append(0)
 
-    # print(scores)
-
     return status
 
 def determine_team(img_elim):
+    img_src = img_elim.copy()
     # Determine team by making sure image include vertical border and match team colors
-    b = 4 # border thickness
+    b = 2 # border thickness
     img_elim[b:img_elim.shape[0]-b,:] = (0,0,0)
 
     img_1 = utils.match_color(img_elim, TEAM_1_COLOR_LB, TEAM_1_COLOR_UB)
     img_2 = utils.match_color(img_elim, TEAM_2_COLOR_LB, TEAM_2_COLOR_UB)
     sum_1 = np.sum(img_1)/255
     sum_2 = np.sum(img_2)/255
-    if np.abs(sum_1-sum_2) < 10:
-        # print(sum_1, sum_2)
-        # cv2.imshow('Src', img_elim)
-        # cv2.imshow('Team 1', img_1)
-        # cv2.imshow('Team 2', img_2)
-        # cv2.waitKey(0)
-        return None # Diff between red and blue are too small
 
-    team = int(np.argmax([sum_1,sum_2])+1)
+    if np.abs(sum_1-sum_2) < 10:
+        team = None # Diff between red and blue are too small
+    else:
+        team = int(np.argmax([sum_1,sum_2])+1)
 
     # print(sum_1, sum_2, team)
-    # cv2.imshow('Src', img_elim)
+    # cv2.imshow('Src', img_src)
+    # cv2.imshow('Border', img_elim)
     # cv2.imshow('Team 1', img_1)
     # cv2.imshow('Team 2', img_2)
     # cv2.waitKey(0)
@@ -160,9 +154,9 @@ def read_elims(src, rects, templates):
             # Crop unscaled image
             rect_elim = np.array((
                 loc[0]/RATIO,
-                loc[1]/RATIO-7, # Offset to top of elim rect
+                loc[1]/RATIO-6, # Offset to top of elim rect
                 templates[hero].shape[1]/RATIO, # Use template width
-                29 # Height of elim rect
+                28 # Height of elim rect
             ),dtype=np.int32)
             img_elim = utils.crop(img, rect_elim)
             team = determine_team(img_elim)
@@ -307,27 +301,30 @@ def refine(code):
             start, end = d
             team = 1 if p < 7 else 2
 
-            # NOTE: echo ult kill shows echo but hero shows duplicated hero.
-            # No effect here because echo ulting won't die
+            # NOTE: Echo ult kill shows echo but hero shows duplicated hero.
+            # No effect here because echo ulting won't die??
+            # Hero only changes after respawn
             hs_self = list(set(hero[str(p)][start:end]))
             assert len(hs_self) == 1
             h_self = hs_self[0] # current hero
-
             h_opp = -1
 
             for es in elim['data'][start:end]:
                 if len(es) == 0: continue
-                if h_opp != -1: break
 
                 for e in es:
                     if h_self == e[1][0] and team == e[1][1]:
                         if e[0] is not None:
+                            # NOTE: All the elimination info read from images
+                            # related to this death should all be caused by the
+                            # same hero
+                            if h_opp != -1: assert h_opp == e[0][0]
                             h_opp = e[0][0]
                         else:
                             h_opp = None
                         break
 
-            assert h_opp != -1
+            if h_opp == -1: print('Death {} of player {:d} {} no opponent hero'.format(d, p, HEROES[h_self]))
 
             elim_new[str(p)][start] = h_opp
 
@@ -356,8 +353,13 @@ def refine(code):
 
 # utils.read_batch(process_status, start=0, map='volskaya', length=731, num_width=3, num_height=16)
 # utils.read_batch(process_elims, start=20, map='volskaya', length=731, num_width=5, num_height=4)
-# utils.read_batch(process_elims, start=0, map='rialto', length=470, num_width=5, num_height=4)
+
 # save(0,None,'volskaya')
 # refine('volskaya')
+
 # save(0,None,'hanamura')
 # refine('hanamura')
+
+# utils.read_batch(process_elims, start=49, code='junkertown', num_width=5, num_height=4)
+# save(0,None,'junkertown')
+# refine('junkertown')

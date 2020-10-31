@@ -12,7 +12,7 @@ HERO_RECT_7 = (864,48,21,25)
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
-HERO_THRESHOLD = 0.7
+HERO_THRESHOLD = 0.75
 
 HEROES = [
     'ana',
@@ -161,6 +161,7 @@ def read_hero(src, rect, templates):
     scores = []
     for hero in templates:
         res = cv2.matchTemplate(img, templates[hero], cv2.TM_CCOEFF_NORMED)
+        res[np.isnan(res)] = 0
         scores.append((hero, np.max(res)))
 
     scores.sort(reverse=True, key=lambda s:s[1])
@@ -275,3 +276,7 @@ def refine(code):
 # utils.read_batch(process_heroes, start=1, map='hanamura', length=1623, num_width=2, num_height=32)
 # save(0, None, 'hanamura')
 # refine('hanamura')
+
+# utils.read_batch(process_heroes, start=13, code='junkertown', num_width=2, num_height=32)
+# save(0, None, 'junkertown')
+# refine('junkertown')

@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
-from utils import crop, match_color, read_batch, val_to_string
+import utils
 
 LOCKED_RECT = (627,80,25,25)
 LOCKED_MASK = np.array([
@@ -25,22 +26,22 @@ PAYLOAD_MASK = np.array([
     [int(PAYLOAD_RECT[2]/2),PAYLOAD_RECT[3]-1],
     [0,PAYLOAD_RECT[3]-PAYLOAD_TILT_Y],
 ], dtype=np.int32)
-PAYLOAD_THRESHOLD = 0.5
+PAYLOAD_THRESHOLD = 0.6
 
 STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
-STATUS_THRESHOLD = 0.6
+STATUS_THRESHOLD = 0.8
 
 def save_templates():
     img = cv2.imread('img/rialto/rialto_10560.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/escort_locked.jpg', crop(img, LOCKED_RECT))
+    cv2.imwrite('template/escort_locked.jpg', utils.crop(img, LOCKED_RECT))
 
     img = cv2.imread('img/rialto/rialto_1530.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/escort_payload_2.jpg', crop(img, PAYLOAD_RECT))
+    cv2.imwrite('template/escort_payload_2.jpg', utils.crop(img, PAYLOAD_RECT))
 
     img = cv2.imread('img/rialto/rialto_11610.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/escort_payload_1.jpg', crop(img, PAYLOAD_RECT))
+    cv2.imwrite('template/escort_payload_1.jpg', utils.crop(img, PAYLOAD_RECT))
 
-    # cv2.imshow('img', crop(img, PAYLOAD_RECT))
+    # cv2.imshow('img', utils.crop(img, PAYLOAD_RECT))
     # cv2.waitKey(0)
 
 def read_tempaltes():
@@ -69,24 +70,26 @@ def read_tempaltes():
     return templates
 
 def read_status(src, templates):
-    img = crop(src, STATUS_RECT)
+    img = utils.crop(src, STATUS_RECT)
 
     scores = []
     template, mask = templates['locked']
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
+    res[np.isnan(res)] = 0
     loc = np.unravel_index(np.argmax(res), res.shape)
     scores.append((-1, loc, res[loc]))
 
     for team in [1,2]:
         template, mask = templates['payload'][team]
         res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
+        res[np.isnan(res)] = 0
         loc = np.unravel_index(np.argmax(res), res.shape)
         scores.append((team, loc, res[loc]))
 
     scores.sort(reverse=True, key=lambda m:m[2])
     score = scores[0]
 
-    # print(scores)
+    print(scores)
     threshold = STATUS_THRESHOLD if score[0] == -1 else PAYLOAD_THRESHOLD
     if score[2] > threshold:
         return score[0], (score[1][1],score[1][0]) # Attacking team
@@ -100,7 +103,7 @@ def read_progress(src, templates):
     status, loc = read_status(src, templates)
 
     if status is None: return None, None
-    if status == -1: return None, -1
+    if status == -1: return -1, -1
 
     team = 2 if status == 1 else 1
     percent = read_payload(loc[0])
@@ -113,9 +116,9 @@ templates = read_tempaltes()
 def process_status(src):
     status, loc = read_status(src, templates)
 
-    img = crop(src, STATUS_RECT)
+    img = utils.crop(src, STATUS_RECT)
 
-    return '{}'.format(val_to_string(status)), img
+    return '{}'.format(utils.val_to_string(status)), img
 
 def mark_progress(img, progress, dx, dy):
     if progress is not None and progress > -1:
@@ -127,15 +130,64 @@ def mark_progress(img, progress, dx, dy):
     return img
 
 def process_progress(img):
-    team, progress = read_progress(img, templates)
-    img_progress = crop(img, STATUS_RECT)
+    status, progress = read_progress(img, templates)
+    img_progress = utils.crop(img, STATUS_RECT)
 
     mark_progress(img_progress, progress, 0, 0)
 
     return '{} {}'.format(
-        val_to_string(team),
-        val_to_string(progress)
+        utils.val_to_string(status),
+        utils.val_to_string(progress)
     ), img_progress
 
-# read_batch(process_status, start=0, map='rialto', length=470, num_width=6, num_height=12)
-# read_batch(process_progress, start=0, map='rialto', length=470, num_width=6, num_height=12)
+def save(start, end, code):
+    obj = {
+        'type':'escort',
+        'status': [],
+        'progress': [],
+    }
+
+    for src, frame in utils.read_frames(start, end, code):
+        status, progress = read_progress(src, templates)
+
+        obj['status'].append(status)
+        obj['progress'].append(progress)
+
+        print('Frame {:d} analyzed'.format(frame))
+
+    utils.save_data('obj', obj, start, end, code)
+
+def refine(code):
+    obj = utils.load_data('obj',0,None,code)
+
+    obj['status'] = utils.remove_outlier(obj['status'],size=2,interp=False)
+    # Avoid interpolation between -1 and other value
+    obj['progress'] = utils.remove_outlier(obj['progress'],size=2,min=0)
+    # Fill none bewteen number and -1 with number
+    obj['progress'] = utils.remove_outlier(obj['progress'],size=2,interp=False)
+
+    utils.extend_none(obj['status'], [
+        obj['status'],
+        obj['progress']
+    ], type='left')
+
+    obj_src = utils.load_data('obj',0,None,code)
+    plt.figure('status')
+    plt.plot(obj['status'])
+
+    plt.figure('progress')
+    plt.plot(obj['progress'])
+    plt.plot(obj_src['progress'], '.', markersize=1)
+    plt.show()
+
+    utils.save_data('obj_r', obj, 0, None, code)
+
+# utils.read_batch(process_status, start=0, code='rialto', num_width=6, num_height=12)
+# utils.read_batch(process_progress, start=0, code='rialto', num_width=6, num_height=12)
+# save(0,None,'rialto')
+# refine('rialto')
+
+# utils.read_batch(process_status, start=15, code='junkertown', num_width=6, num_height=12)
+# utils.read_batch(process_progress, start=0, code='junkertown', num_width=6, num_height=18)
+# save(0,None,'junkertown')
+# refine('junkertown')

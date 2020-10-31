@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import json
 import matplotlib.pyplot as plt
 
 import utils
@@ -330,7 +329,7 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],2)
+    obj['status'] = utils.remove_outlier(obj['status'],size=2)
 
     # Extend map range
     breaks = [0]
@@ -441,5 +440,5 @@ def refine(code):
 
 # utils.read_batch(process_status, start=4)
 # utils.read_batch(process_progress, start=0, num_height=16)
-save(0,None,'nepal')
-refine('nepal')
+# save(0,None,'nepal')
+# refine('nepal')

@@ -268,7 +268,7 @@ def refine(code):
 
     for player in range(1,13):
         # ult can become 100(None) at i frame and then 0 at i+1 frame
-        ult[str(player)] = utils.remove_outlier(ult[str(player)], types=['number', 'change'], size=1, threshold=0.2)
+        ult[str(player)] = utils.remove_outlier(ult[str(player)], threshold=0.1)
 
     utils.fix_disconnect(code, ult, 0)
 
@@ -278,15 +278,18 @@ def refine(code):
             if ult[player][i] is None and obj['status'][i] is not None:
                 ult[player][i] = 100
         # Remove resurrect, up and almost returns to original percent
-        ult[player] = utils.remove_outlier(ult[player], size=4, types=['up'], threshold=0.3, min=100)
+        ult[player] = utils.remove_outlier(
+            ult[player],
+            size=5,
+            types=['up'],
+            threshold=0.3,
+            min=100,
+            duration=4
+        )
 
     ult_src = utils.load_data('ult',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
-
-    plt.figure('progress')
-    for key in obj['progress']:
-        plt.plot(obj['progress'][key])
 
     plt.figure('ult team 1')
     for player in range(1,7):
@@ -302,12 +305,17 @@ def refine(code):
     plt.show()
 
     utils.save_data('ult_r', ult, 0, None, code)
+
 # utils.read_batch(process_ults, start=2, map='nepal', length=835, num_width=3, num_height=24)
 # save(0, None, 'nepal')
 # refine('nepal')
+
 # save(0, None, 'volskaya')
 # refine('volskaya')
 
 # utils.read_batch(process_ults, start=18, map='hanamura', length=1623, num_width=3, num_height=24)
 # save(0, None, 'hanamura')
 # refine('hanamura')
+
+# save(0, None, 'junkertown')
+# refine('junkertown')

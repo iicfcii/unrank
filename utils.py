@@ -71,9 +71,13 @@ def extract_locs(res, match_threshold, dist_threshold):
 
     return locs_s
 
+# When type is none
+# min: minimum value the number can be
+# max: maximum value the number can be
+# When type is change
 # min: minimum value when removing upward sudden change
 # max: maximum value when removing downward sudden change
-def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4, min=None, max=None, interp=True):
+def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4, min=None, max=None, duration=0, interp=True):
     data = np.array(src)
 
     def remove(type):
@@ -84,7 +88,17 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
                 data[i] is not None and
                 data[i+size+1] is not None
             ):
-                data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+                if interp:
+                    if min is not None and (data[i] < min or data[i+size+1] < min):
+                        continue
+
+                    if max is not None and (data[i] > max or data[i+size+1] > max):
+                        continue
+
+                    data[i+1:i+size+1] = (data[i]+data[i+size+1])/2
+                else:
+                    data[i+1:i+size+1] = data[i]
+
             if ( # None number None
                 type == 'number' and
                 np.any(data[i+1:i+size+1] != None) and
@@ -92,6 +106,7 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
                 data[i+size+1] is None
             ):
                 data[i+1:i+size+1] = None
+
             if ( # small Large small
                 (type == 'change' or type == 'up' or type == 'down') and
                 np.all(data[i:i+size+2] != None) # All numbers
@@ -99,14 +114,21 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
                 if (
                     min is not None and
                     (type == 'up' or type=='change') and
-                    np.all(data[i:i+size+2] < min)
+                    (
+                        np.all(data[i:i+size+2] < min) or
+                        np.sum(data[i:i+size+2] >= min) < duration
+                    )
                 ):
                     continue
 
                 if (
                     max is not None and
                     (type == 'down' or type=='change') and
-                    np.all(data[i:i+size+2] > max)
+                    (
+                        np.all(data[i:i+size+2] > max) or
+                        np.sum(data[i:i+size+2] <= max) < duration
+                    )
+
                 ):
                     continue
 
@@ -128,7 +150,9 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
 
     return data.tolist()
 
-def extend_none(mask, datas, size=1, type='both'): # 'left' 'right'
+# type: left, right, both
+# no extend for start and end nones
+def extend_none(mask, datas, size=1, type='both'):
     if size == 0:
         for i in range(size, len(mask), 1):
             if mask[i] is None:
@@ -138,14 +162,22 @@ def extend_none(mask, datas, size=1, type='both'): # 'left' 'right'
 
     if type == 'left' or type == 'both':
         for i in range(size, len(mask), 1):
-            if mask[i] is None and mask[i-1] is not None:
+            if (
+                mask[i] is None and
+                mask[i-1] is not None and
+                not np.all(mask[i:] == None)
+            ):
                 mask[i-size:i] = [None]*size
                 for data in datas:
                     data[i-size:i] = [None]*size
 
     if type == 'right' or type == 'both':
         for i in range(len(mask)-size-1, -1, -1):
-            if mask[i] is None and mask[i+1] is not None:
+            if (
+                mask[i] is None and
+                mask[i+1] is not None and
+                not np.all(mask[:i] == None)
+            ):
                 mask[i+1:i+1+size] = [None]*size
                 for data in datas:
                     data[i+1:i+1+size] = [None]*size
@@ -222,12 +254,13 @@ def fix_disconnect(code, data, value):
                 if p == player:
                     data[str(p)][i] = value
 
-def read_batch(process, start=0, map='nepal', length=835, num_width=8, num_height=8):
+def read_batch(process, start=0, code='nepal', num_width=8, num_height=8):
+    length = count_frames(code)
     shape = None
     for i in range(start,int(length/num_width/num_height)+1):
         imgs = []
         for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
-            img = cv2.imread('img/'+map+'/'+map+'_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
+            img = cv2.imread('img/'+code+'/'+code+'_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
             if img is None:
                 img = np.zeros(shape, dtype=np.uint8)
             else:

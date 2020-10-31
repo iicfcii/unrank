@@ -344,8 +344,8 @@ def refine(code):
 
     utils.save_data('obj_r', obj, 0, None, code)
 
-# utils.read_batch(process_status, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
-# utils.read_batch(process_progress, map='hanamura', length=1623, start=0, num_width=12, num_height=16)
+# utils.read_batch(process_status, code='hanamura', start=0, num_width=12, num_height=16)
+# utils.read_batch(process_progress, code='hanamura', start=0, num_width=12, num_height=16)
 # save(0, None, 'hanamura')
 # refine('hanamura')
 # save(0, None, 'volskaya')
