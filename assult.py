@@ -15,11 +15,14 @@ ICON_MASK = np.array([[ICON_RECT_1[2]/2, 2],
                       [ICON_RECT_1[2]/2, ICON_RECT_1[3]-2],
                       [2, ICON_RECT_1[3]/2]], dtype=np.int32)
 ICON_THRESHOLD = 0.6 # NOTE: A,B icon change size a bit when point is contesting
+POINT_RECT = (17,16,12,13)
 TEXT_RECT = (18,17,10,11)
 TEXT_THRESHOLD = {
-    1: {'A':187,'B':182},
-    2: {'A':179,'B':175}
+    1: {'A':186,'B':182},
+    2: {'A':178,'B':175}
 }
+# CAPTURE_THRESHOLD = {'A':9, 'B':9.5}
+CAPTURE_THRESHOLD = {'A':60, 'B':60}
 
 TEAM1_COLOR = np.array((85, 150, 255)) # HSV, RGB 67, 212, 255
 TEAM1_COLOR_RANGE = np.array((20, 120, 40))
@@ -82,6 +85,20 @@ def read_tempaltes():
 
     return templates
 
+def read_capture(img_point, img_text, team, point):
+    img_point = cv2.cvtColor(img_point, cv2.COLOR_BGR2HSV)
+    img_text = cv2.cvtColor(img_text, cv2.COLOR_BGR2HSV)
+
+    sum_point = np.sum(img_point[:,:,2])
+    area_point = img_point.shape[0]*img_point.shape[1]
+    sum_text = np.sum(img_text[:,:,2])
+    area_text = img_text.shape[0]*img_text.shape[1]
+
+    mean_point = (sum_point-sum_text)/(area_point-area_text)
+    mean_text =  sum_text/area_text
+    # print(mean_point-mean_text)
+    return mean_point-mean_text > CAPTURE_THRESHOLD[point]
+
 def read_status(src, templates):
     status = {}
 
@@ -118,18 +135,20 @@ def read_status(src, templates):
             if score[0] > 0:
                 loc = score[1]
                 dy = 14 if loc[0] > 11 else 10
+                img_point = utils.crop(img, (
+                    POINT_RECT[0],
+                    POINT_RECT[1]+(dy-ICON_RECT_1[1]+progress_rect[1]),
+                    POINT_RECT[2],
+                    POINT_RECT[3]
+                ))
                 img_text = utils.crop(img, (
                     TEXT_RECT[0],
                     TEXT_RECT[1]+(dy-ICON_RECT_1[1]+progress_rect[1]),
                     TEXT_RECT[2],
                     TEXT_RECT[3]
                 ))
-                img_text = cv2.cvtColor(img_text, cv2.COLOR_BGR2HSV)
-                # print(np.mean(img_text[:,:,2]))
-                if np.mean(img_text[:,:,2]) < TEXT_THRESHOLD[score[0]][point]:
-                    score = (score[0]+0.1, scores[1], score[2])
-                # cv2.imshow('text', img_text[:,:,2])
-                # cv2.waitKey(0)
+                if read_capture(img_point, img_text, score[0], point):
+                    score = (score[0]+0.1, score[1], score[2])
 
             status[point] = (score[0], (score[1][1],score[1][0]))
         else:
@@ -176,9 +195,9 @@ def read_progress(src, templates):
     img_full_progress = utils.crop(src, PROGRESS_RECT)
     if status_a is None or status_b is None: return None, None, None
     # if point a is locked, point b must be locked
-    if status_a == -1: return None, -1, -1
-    if status_a == 0 and status_b == 0: return None, 100, 100
-    if status_a == 0 and status_b == -1: return None, 100, -1
+    if status_a == -1: return -1, -1, -1
+    if status_a == 0 and status_b == 0: return -1, 100, 100
+    if status_a == 0 and status_b == -1: return -1, 100, -1
 
     progress = {'A': 0, 'B': 0}
     loc = {'A': loc_a, 'B': loc_b}
@@ -275,16 +294,31 @@ def save(start, end, code):
 
     utils.save_data('obj', obj, start, end, code)
 
+# Remove progress increase whihle not capturing point
+def remove_capture(capturing, progress):
+    # Remove progress increase whihle not capturing point
+    for i in range(len(capturing)):
+        # 3 consecutive not capturing means no progress increase
+        if np.any(capturing[i-2:i+1]) != 0: continue
+
+        if progress[i] is None or progress[i-1] is None:
+            continue
+
+        # can still go from -1 to 0
+        # and allow minor change due to detection error
+        # not capturing point when reaching 100
+        if progress[i]-progress[i-1] > 2 and progress[i] != 100:
+            progress[i] = progress[i-1]
+
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],2,['none','number'])
-    obj['capturing'] = utils.remove_outlier(obj['capturing'],2,['none','number'])
+    obj['status'] = utils.remove_outlier(obj['status'],3,interp=False)
+    obj['capturing'] = utils.remove_outlier(obj['capturing'],3,['none','number'])
     obj['capturing'] = utils.remove_outlier(obj['capturing'],1,['change'])
     for point in ['A', 'B']:
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,['none','number','change'])
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,['change'])
-
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3, min=0)
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2, interp=False)
     # Fill not capturing
     for i in range(len(obj['capturing'])):
         if obj['progress']['A'][i] is None and obj['progress']['B'][i] is None:
@@ -293,35 +327,8 @@ def refine(code):
         if obj['capturing'][i] is None:
             obj['capturing'][i] = 0
 
-    # Fill locked
-    for i in range(len(obj['capturing'])):
-        if (
-            obj['progress']['A'][i] == -1 or
-            (obj['progress']['A'][i] == 100 and obj['progress']['B'][i] == 100) or
-            (obj['progress']['A'][i] == 100 and obj['progress']['B'][i] == -1)
-        ):
-            obj['status'][i] = -1
-
-    # Remove progress increase whihle not capturing point
-    for i in range(len(obj['capturing'])):
-        # 3 consecutive not capturing means no progress increase
-        if np.any(obj['capturing'][i-2:i+1]) != 0: continue
-
-        for point in ['A', 'B']:
-            if (
-                obj['progress'][point][i] is None or
-                obj['progress'][point][i-1] is None
-            ):
-                continue
-
-            if (
-                # can still go from -1 to 0
-                # and allow minor change due to detection error
-                obj['progress'][point][i]-obj['progress'][point][i-1] > 2 and
-                # not capturing point when reaching 100
-                obj['progress'][point][i] != 100
-            ):
-                obj['progress'][point][i] = obj['progress'][point][i-1]
+    for point in ['A', 'B']:
+        remove_capture(obj['capturing'], obj['progress'][point])
 
     # Remove one frame before entering black screen
     utils.extend_none(obj['status'], [
@@ -331,16 +338,17 @@ def refine(code):
         obj['progress']['B']
     ], type='left')
 
-    # plt.figure('obj')
-    # plt.subplot(4,1,1)
-    # plt.plot(obj['status'])
-    # plt.subplot(4,1,2)
-    # plt.plot(obj['capturing'])
-    # plt.subplot(4,1,3)
-    # plt.plot(obj['progress']['A'])
-    # plt.subplot(4,1,4)
-    # plt.plot(obj['progress']['B'])
-    # plt.show()
+    obj_src = utils.load_data('obj',0,None,code)
+    plt.figure('status')
+    plt.plot(obj['status'])
+    plt.figure('capturing')
+    plt.plot(obj['capturing'])
+    plt.figure('progress')
+    plt.plot(obj['progress']['A'])
+    plt.plot(obj['progress']['B'])
+    plt.plot(obj_src['progress']['A'], '.', markersize=1)
+    plt.plot(obj_src['progress']['B'], '.', markersize=1)
+    plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)
 

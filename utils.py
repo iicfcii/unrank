@@ -84,7 +84,7 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
         for i in range(len(data)-size-1):
             if ( # number None number
                 type == 'none' and
-                np.any(data[i+1:i+size+1] == None) and
+                np.any(data[i+1:i+size+1] == np.array([None])) and
                 data[i] is not None and
                 data[i+size+1] is not None
             ):
@@ -101,7 +101,7 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
 
             if ( # None number None
                 type == 'number' and
-                np.any(data[i+1:i+size+1] != None) and
+                np.any(data[i+1:i+size+1] != np.array([None])) and
                 data[i] is None and
                 data[i+size+1] is None
             ):
@@ -109,7 +109,7 @@ def remove_outlier(src, size=1, types=['none','number','change'], threshold=0.4,
 
             if ( # small Large small
                 (type == 'change' or type == 'up' or type == 'down') and
-                np.all(data[i:i+size+2] != None) # All numbers
+                np.all(data[i:i+size+2] != np.array([None])) # All numbers
             ):
                 if (
                     min is not None and
@@ -165,7 +165,7 @@ def extend_none(mask, datas, size=1, type='both'):
             if (
                 mask[i] is None and
                 mask[i-1] is not None and
-                not np.all(mask[i:] == None)
+                not np.all(mask[i:] == np.array([None]))
             ):
                 mask[i-size:i] = [None]*size
                 for data in datas:
@@ -176,7 +176,7 @@ def extend_none(mask, datas, size=1, type='both'):
             if (
                 mask[i] is None and
                 mask[i+1] is not None and
-                not np.all(mask[:i] == None)
+                not np.all(mask[:i] == np.array([None]))
             ):
                 mask[i+1:i+1+size] = [None]*size
                 for data in datas:

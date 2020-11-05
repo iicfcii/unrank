@@ -26,7 +26,7 @@ PAYLOAD_MASK = np.array([
     [int(PAYLOAD_RECT[2]/2),PAYLOAD_RECT[3]-1],
     [0,PAYLOAD_RECT[3]-PAYLOAD_TILT_Y],
 ], dtype=np.int32)
-PAYLOAD_THRESHOLD = 0.6
+PAYLOAD_THRESHOLD = 0.55
 
 STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
 STATUS_THRESHOLD = 0.8
@@ -88,8 +88,7 @@ def read_status(src, templates):
 
     scores.sort(reverse=True, key=lambda m:m[2])
     score = scores[0]
-
-    print(scores)
+    # print(scores)
     threshold = STATUS_THRESHOLD if score[0] == -1 else PAYLOAD_THRESHOLD
     if score[2] > threshold:
         return score[0], (score[1][1],score[1][0]) # Attacking team

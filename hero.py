@@ -273,7 +273,7 @@ def refine(code):
 # save(0, None, 'nepal')
 # refine('nepal')
 
-# utils.read_batch(process_heroes, start=1, map='hanamura', length=1623, num_width=2, num_height=32)
+# utils.read_batch(process_heroes, start=3, code='hanamura', num_width=2, num_height=32)
 # save(0, None, 'hanamura')
 # refine('hanamura')
 
