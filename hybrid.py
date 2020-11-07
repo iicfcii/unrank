@@ -293,7 +293,7 @@ def refine(code):
     plt.plot(obj_src['progress']['payload'], '.', markersize=1)
     plt.show()
 
-    # utils.save_data('obj_r', obj, 0, None, code)
+    utils.save_data('obj_r', obj, 0, None, code)
 
 # utils.read_batch(process_status, start=1, code='numbani', num_width=6, num_height=12)
 # utils.read_batch(process_progress, start=0, code='numbani', num_width=6, num_height=12)

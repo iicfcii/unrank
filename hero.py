@@ -99,7 +99,7 @@ def save_templates():
     cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -3, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
     cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
-    cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -6, 0)))
+    cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
 
     img_4 = cv2.imread('img/volskaya/volskaya_14340.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_mccree.jpg', utils.crop(img_4, offset_rect(rects[3], 2, 0)))
@@ -115,7 +115,7 @@ def save_templates():
     cv2.imwrite('template/hero_echo.jpg', utils.crop(img_7, offset_rect(rects[12], 4, 0)))
 
     img_8 = cv2.imread('img/hanamura/hanamura_1260.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/hero_sombra.jpg', utils.crop(img_8, rects[1]))
+    cv2.imwrite('template/hero_sombra.jpg', utils.crop(img_8, offset_rect(rects[1],-7, 0)))
     cv2.imwrite('template/hero_zenyatta.jpg', utils.crop(img_8, rects[3]))
     cv2.imwrite('template/hero_reaper.jpg', utils.crop(img_8, offset_rect(rects[9], 2, 0)))
 
@@ -280,3 +280,7 @@ def refine(code):
 # utils.read_batch(process_heroes, start=13, code='junkertown', num_width=2, num_height=32)
 # save(0, None, 'junkertown')
 # refine('junkertown')
+
+# utils.read_batch(process_heroes, start=8, code='blizzardworld', num_width=2, num_height=32)
+# save(0, None, 'blizzardworld')
+# refine('blizzardworld')

@@ -319,3 +319,6 @@ def refine(code):
 
 # save(0, None, 'junkertown')
 # refine('junkertown')
+
+# save(0, None, 'blizzardworld')
+# refine('blizzardworld')

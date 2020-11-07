@@ -305,6 +305,7 @@ def refine(code):
             # No effect here because echo ulting won't die??
             # Hero only changes after respawn
             hs_self = list(set(hero[str(p)][start:end]))
+            # print(hs_self, start, end)
             assert len(hs_self) == 1
             h_self = hs_self[0] # current hero
             h_opp = -1
@@ -363,3 +364,7 @@ def refine(code):
 # utils.read_batch(process_elims, start=49, code='junkertown', num_width=5, num_height=4)
 # save(0,None,'junkertown')
 # refine('junkertown')
+
+# utils.read_batch(process_elims, start=28, code='blizzardworld', num_width=5, num_height=4)
+# save(0, None, 'blizzardworld')
+# refine('blizzardworld')
