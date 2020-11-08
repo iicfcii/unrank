@@ -1,7 +1,7 @@
 import cv2
 
 # NOTE: Manually create folder first
-vidName = 'blizzardworld'
+vidName = 'maps_2'
 vid = cv2.VideoCapture('vid/'+vidName+'.mp4')
 
 fps = int(vid.get(cv2.CAP_PROP_FPS))
