@@ -1,14 +1,14 @@
 import cv2
 
 # NOTE: Manually create folder first
-vidName = 'maps_2'
+vidName = 'maps_3'
 vid = cv2.VideoCapture('vid/'+vidName+'.mp4')
 
 fps = int(vid.get(cv2.CAP_PROP_FPS))
 width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
 print(fps, width, height)
-
+fps = 30
 
 frame_count = 0
 while True:

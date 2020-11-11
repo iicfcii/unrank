@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import utils
 
-MAP_RECT = (500,627,618,60)
+MAP_RECT = (500,627,650,60)
 MAP_THRESHOLD = 0.8
 MAPS = {
     'blizzardworld': 'hybrid',
@@ -102,6 +102,18 @@ def save_templates():
     img = cv2.imread('img/maps_2/maps_2_960.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_hollywood.jpg', utils.crop(img, rect))
 
+    rect = (750,627,368,60)
+    img = cv2.imread('img/maps_3/maps_3_180.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/map_lijiangtower.jpg', utils.crop(img, rect))
+
+    rect = (854,627,264,60)
+    img = cv2.imread('img/maps_3/maps_3_420.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/map_route66.jpg', utils.crop(img, rect))
+
+    rect = (882,627,236,60)
+    img = cv2.imread('img/maps_3/maps_3_600.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/map_dorado.jpg', utils.crop(img, rect))
+
     # cv2.imshow('img', utils.crop(img, rect))
     # cv2.waitKey(0)
 
@@ -148,4 +160,4 @@ def process_map(src):
         utils.val_to_string(map),
     ), img
 
-utils.read_batch(process_map, start=0, code='rialto', num_width=2, num_height=6)
+# utils.read_batch(process_map, start=0, code='blizzardworld', num_width=2, num_height=6)
