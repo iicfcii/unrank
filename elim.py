@@ -294,27 +294,30 @@ def refine(code):
                 death[player].append((start, i))
                 start = None
 
-    elim_new = {'heroes': HEROES}
-    for p in range(1,13):
-        elim_new[str(p)] = [None]*len(health[str(p)])
-        for d in death[p]:
+    elim_r = {'heroes': HEROES}
+    for p_self in range(1,13):
+        elim_r[str(p_self)] = [None]*len(health[str(p_self)])
+        for d in death[p_self]:
             start, end = d
-            team = 1 if p < 7 else 2
+            team_self = 1 if p_self < 7 else 2
 
             # NOTE: Echo ult kill shows echo but hero shows duplicated hero.
             # No effect here because echo ulting won't die??
             # Hero only changes after respawn
-            hs_self = list(set(hero[str(p)][start:end]))
-            # print(hs_self, start, end)
+            hs_self = list(set(hero[str(p_self)][start:end]))
+            if -1 in hs_self:
+                hs_self.remove(-1)
+                print('Not sure hero', p_self, start, end)
             assert len(hs_self) == 1
             h_self = hs_self[0] # current hero
             h_opp = -1
+            p_opp = -1
 
             for es in elim['data'][start:end]:
                 if len(es) == 0: continue
 
                 for e in es:
-                    if h_self == e[1][0] and team == e[1][1]:
+                    if h_self == e[1][0] and team_self == e[1][1]:
                         if e[0] is not None:
                             # NOTE: All the elimination info read from images
                             # related to this death should all be caused by the
@@ -322,14 +325,28 @@ def refine(code):
                             if h_opp != -1: assert h_opp == e[0][0]
                             h_opp = e[0][0]
                         else:
+                            # Suicide
                             h_opp = None
+                            p_opp = None
+
+                        # No duplicate elim possible for a signle frame
                         break
 
-            if h_opp == -1: print('Death {} of player {:d} {} no opponent hero'.format(d, p, HEROES[h_self]))
+            if h_opp is not None:
+                # Find the player
+                team_opp = 1 if p_self > 6 else 2
+                # Extend search range for echo(hero changes when ulting)
+                if HEROES[h_opp] == 'echo': start -= 10
+                for p in range((team_opp-1)*6+1,(team_opp-1)*6+7):
+                    if h_opp in hero[str(p)][start:end]:
+                        p_opp = p
 
-            elim_new[str(p)][start] = h_opp
+            if p_opp == -1 or h_opp == -1:
+                print('Death {} of player {:d} {} caused by opponent player {:d} {}'.format(d, p_self, HEROES[h_self], p_opp, HEROES[h_opp]))
 
-    elim = elim_new
+            elim_r[str(p_self)][start] = p_opp
+
+    elim = elim_r
 
     health_src = utils.load_data('health',0,None,code)
     elim_src = utils.load_data('elim',0,None,code)

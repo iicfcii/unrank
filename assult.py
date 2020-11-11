@@ -21,7 +21,6 @@ TEXT_THRESHOLD = {
     1: {'A':186,'B':182},
     2: {'A':178,'B':175}
 }
-# CAPTURE_THRESHOLD = {'A':9, 'B':9.5}
 CAPTURE_THRESHOLD = {'A':60, 'B':60}
 
 TEAM1_COLOR = np.array((85, 150, 255)) # HSV, RGB 67, 212, 255
@@ -317,8 +316,8 @@ def refine(code):
     obj['capturing'] = utils.remove_outlier(obj['capturing'],3,['none','number'])
     obj['capturing'] = utils.remove_outlier(obj['capturing'],1,['change'])
     for point in ['A', 'B']:
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3, min=0)
-        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2, interp=False)
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],3,min=0)
+        obj['progress'][point] = utils.remove_outlier(obj['progress'][point],2,interp=False)
     # Fill not capturing
     for i in range(len(obj['capturing'])):
         if obj['progress']['A'][i] is None and obj['progress']['B'][i] is None:

@@ -96,7 +96,7 @@ def save_templates():
     cv2.imwrite('template/hero_soldier76.jpg', utils.crop(img_2, offset_rect(rects[3], -3, 0)))
 
     img_3 = cv2.imread('img/volskaya/volskaya_7710.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -3, 0)))
+    cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -5, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
     cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
     cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
@@ -273,7 +273,7 @@ def refine(code):
 # save(0, None, 'nepal')
 # refine('nepal')
 
-# utils.read_batch(process_heroes, start=3, code='hanamura', num_width=2, num_height=32)
+# utils.read_batch(process_heroes, start=10, code='hanamura', num_width=2, num_height=32)
 # save(0, None, 'hanamura')
 # refine('hanamura')
 
