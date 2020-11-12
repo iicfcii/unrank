@@ -26,7 +26,7 @@ PAYLOAD_MASK = np.array([
     [int(PAYLOAD_RECT[2]/2),PAYLOAD_RECT[3]-1],
     [0,PAYLOAD_RECT[3]-PAYLOAD_TILT_Y],
 ], dtype=np.int32)
-PAYLOAD_THRESHOLD = 0.55
+PAYLOAD_THRESHOLD = 0.6
 
 STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
 STATUS_THRESHOLD = 0.8
@@ -186,7 +186,7 @@ def refine(code):
 # save(0,None,'rialto')
 # refine('rialto')
 
-# utils.read_batch(process_status, start=15, code='junkertown', num_width=6, num_height=12)
+# utils.read_batch(process_status, start=0, code='junkertown', num_width=6, num_height=12)
 # utils.read_batch(process_progress, start=0, code='junkertown', num_width=6, num_height=18)
 # save(0,None,'junkertown')
 # refine('junkertown')
