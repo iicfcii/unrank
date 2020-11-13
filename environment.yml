@@ -1,0 +1,13 @@
+# Install miniconda
+# https://docs.conda.io/en/latest/miniconda.html
+name: unrank
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+    - opencv-contrib-python
+    - Pillow
+    - numpy==1.19.3
+    # numpy 1.19.4 has a bug
+    # https://github.com/numpy/numpy/wiki/FMod-Bug-on-Windows
+    - matplotlib
