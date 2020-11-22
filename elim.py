@@ -272,7 +272,7 @@ def refine(code):
     # Clean health data
     utils.extend_none(obj['status'], [health[str(p)] for p in range(1,13)], size=0)
     for player in range(1,13):
-        health[str(player)] = utils.remove_outlier(health[str(player)],size=1)
+        health[str(player)] = utils.remove_outlier(health[str(player)],size=2)
     utils.fix_disconnect(code, health, None)
 
 
@@ -307,7 +307,7 @@ def refine(code):
             hs_self = list(set(hero[str(p_self)][start:end]))
             if -1 in hs_self:
                 hs_self.remove(-1)
-                print('Not sure hero', p_self, start, end)
+                print('Not sure about hero', p_self, start, end)
             assert len(hs_self) == 1
             h_self = hs_self[0] # current hero
             h_opp = -1
@@ -385,3 +385,5 @@ def refine(code):
 # utils.read_batch(process_elims, start=28, code='blizzardworld', num_width=5, num_height=4)
 # save(0, None, 'blizzardworld')
 # refine('blizzardworld')
+
+# refine('control_qp')

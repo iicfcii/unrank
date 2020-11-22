@@ -303,9 +303,13 @@ def file_path(type, start_frame, end_frame, code):
         '{}_{}_{:d}_{:d}.json'.format(code, type, start_frame, end_frame)
     )
 
-def count_frames(code='nepal'):
+def count_frames(code):
     path = os.path.join(IMG_FOLDER_PATH, code)
-    return len(next(os.walk(path))[2])
+
+    for root, dirs, files in os.walk(path):
+        return len(files)
+
+    return 0
 
 def read_frames(start, end, code):
     i = start
@@ -330,7 +334,12 @@ def save_data(type, data, start, end, code):
 def load_data(type, start, end, code):
     if end is None: end = count_frames(code)-1
 
-    with open(file_path(type, start*30, end*30, code)) as f:
-        data = json.load(f)
+    if end < 1: return None
 
-    return data
+    try:
+        with open(file_path(type, start*30, end*30, code)) as f:
+            data = json.load(f)
+
+        return data
+    except FileNotFoundError:
+        return None

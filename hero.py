@@ -248,6 +248,9 @@ def refine(code):
 
         hero[str(player)] = list(hs) # Convert back to list
 
+    # Clean again since previous remove may fill the gap between round
+    utils.extend_none(obj['status'], [hero[str(p)] for p in range(1,13)], size=0)
+
     hero_src = utils.load_data('hero',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
@@ -284,3 +287,5 @@ def refine(code):
 # utils.read_batch(process_heroes, start=8, code='blizzardworld', num_width=2, num_height=32)
 # save(0, None, 'blizzardworld')
 # refine('blizzardworld')
+
+# refine('control_qp')
