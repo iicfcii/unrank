@@ -159,7 +159,7 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],size=2,interp=False)
+    obj['status'] = utils.remove_outlier(obj['status'],size=3,interp=False)
     # Avoid interpolation between -1 and other value
     obj['progress'] = utils.remove_outlier(obj['progress'],size=2,min=0)
     # Fill none bewteen number and -1 with number

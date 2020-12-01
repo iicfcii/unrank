@@ -9,7 +9,7 @@ import map
 import utils
 import matplotlib.pyplot as plt
 
-code = 'control_qp'
+code = 'junkertown'
 
 map_name = None
 for img, frame in utils.read_frames(0,10,code):
@@ -81,6 +81,11 @@ health_r_data = utils.load_data('health_r',0,None,code)
 if health_data is None or health_r_data is None:
     elim.refine(code)
     elim_r_data = utils.load_data('elim_r',0,None,code)
+
+# plt.figure('elim')
+# plt.plot(obj_r_data['status'])
+# plt.plot(obj_data['status'], '.', markersize=1)
+# plt.show()
 
 # plt.figure('doom feeding')
 # for player in range(1,7):
