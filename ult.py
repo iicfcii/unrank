@@ -306,19 +306,19 @@ def refine(code):
 
     utils.save_data('ult_r', ult, 0, None, code)
 
-# utils.read_batch(process_ults, start=2, map='nepal', length=835, num_width=3, num_height=24)
-# save(0, None, 'nepal')
-# refine('nepal')
+def release(code):
+    ult = utils.load_data('ult_r',0,None,code)
+    hero = utils.load_data('hero_r',0,None,code)
 
-# save(0, None, 'volskaya')
-# refine('volskaya')
+    player = 2
+    data = ult[str(player)]
+    for i in range(len(data)-1):
+        if data[i] == 100 and data[i+1] == 0:
+            print(i)
 
-# utils.read_batch(process_ults, start=18, map='hanamura', length=1623, num_width=3, num_height=24)
-# save(0, None, 'hanamura')
-# refine('hanamura')
+    # print(ult['1'])
+    plt.figure('release')
+    plt.plot(ult[str(player)])
+    plt.show()
 
-# save(0, None, 'junkertown')
-# refine('junkertown')
-
-# save(0, None, 'blizzardworld')
-# refine('blizzardworld')
+release('busan')

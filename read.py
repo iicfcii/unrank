@@ -9,7 +9,7 @@ import map
 import utils
 import matplotlib.pyplot as plt
 
-code = 'junkertown'
+code = 'busan'
 
 map_name = None
 for img, frame in utils.read_frames(0,10,code):
@@ -78,18 +78,22 @@ if elim_data is None or health_data is None:
 
 elim_r_data = utils.load_data('elim_r',0,None,code)
 health_r_data = utils.load_data('health_r',0,None,code)
-if health_data is None or health_r_data is None:
+if health_data is None or elim_r_data is None:
     elim.refine(code)
     elim_r_data = utils.load_data('elim_r',0,None,code)
 
-# plt.figure('elim')
-# plt.plot(obj_r_data['status'])
-# plt.plot(obj_data['status'], '.', markersize=1)
-# plt.show()
+assert elim_r_data['heroes'] == hero_r_data['heroes']
+heroes_data = elim_r_data['heroes']
+del elim_r_data['heroes']
+del hero_r_data['heroes']
 
-# plt.figure('doom feeding')
-# for player in range(1,7):
-#     plt.subplot(6,1,player)
-#     plt.plot(health_r_data[str(player)])
-#     plt.plot(elim_r_data['7'],'v')
-# plt.show()
+full_data = {
+    'objective': obj_r_data,
+    'heros': heroes_data,
+    'hero': hero_r_data,
+    'health': health_r_data,
+    'ult': ult_r_data,
+    'elim': elim_r_data,
+}
+
+utils.save_data('full', full_data, 0, None, code)

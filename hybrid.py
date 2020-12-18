@@ -294,12 +294,3 @@ def refine(code):
     plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)
-
-# utils.read_batch(process_status, start=1, code='numbani', num_width=6, num_height=12)
-# utils.read_batch(process_progress, start=0, code='numbani', num_width=6, num_height=12)
-# save(0, None, 'numbani')
-# refine('numbani')
-
-# utils.read_batch(process_progress, start=3, code='blizzardworld', num_width=6, num_height=12)
-# save(0, None, 'blizzardworld')
-# refine('blizzardworld')

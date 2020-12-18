@@ -267,25 +267,3 @@ def refine(code):
     plt.show()
 
     utils.save_data('hero_r', hero, 0, None, code)
-
-# utils.read_batch(process_hero, start=0, map='volskaya', length=731)
-# utils.read_batch(process_heroes, start=8, map='volskaya', length=731, num_width=2, num_height=32)
-# save(0, None, 'volskaya')
-# refine('volskaya')
-
-# save(0, None, 'nepal')
-# refine('nepal')
-
-# utils.read_batch(process_heroes, start=10, code='hanamura', num_width=2, num_height=32)
-# save(0, None, 'hanamura')
-# refine('hanamura')
-
-# utils.read_batch(process_heroes, start=13, code='junkertown', num_width=2, num_height=32)
-# save(0, None, 'junkertown')
-# refine('junkertown')
-
-# utils.read_batch(process_heroes, start=8, code='blizzardworld', num_width=2, num_height=32)
-# save(0, None, 'blizzardworld')
-# refine('blizzardworld')
-
-# refine('control_qp')

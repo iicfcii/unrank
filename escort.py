@@ -180,13 +180,3 @@ def refine(code):
     plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)
-
-# utils.read_batch(process_status, start=0, code='rialto', num_width=6, num_height=12)
-# utils.read_batch(process_progress, start=0, code='rialto', num_width=6, num_height=12)
-# save(0,None,'rialto')
-# refine('rialto')
-
-# utils.read_batch(process_status, start=0, code='junkertown', num_width=6, num_height=12)
-# utils.read_batch(process_progress, start=0, code='junkertown', num_width=6, num_height=18)
-# save(0,None,'junkertown')
-# refine('junkertown')

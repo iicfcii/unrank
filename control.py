@@ -330,6 +330,8 @@ def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
     obj['status'] = utils.remove_outlier(obj['status'],size=2)
+    obj['progress']['1'] = utils.remove_outlier(obj['progress']['1'],size=2)
+    obj['progress']['2'] = utils.remove_outlier(obj['progress']['2'],size=2)
 
     # Extend map range
     breaks = [0]
@@ -422,23 +424,20 @@ def refine(code):
         obj['progress']['2']
     ], type='left')
 
+    obj_src = utils.load_data('obj',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
-
     def map_to_int(data):
         map = {'a': 1, 'b': 2, 'c': 3, None: None}
         return [map[d] for d in data]
     plt.figure('map')
     plt.plot(map_to_int(obj['map']))
-
+    plt.plot(map_to_int(obj_src['map']), '.', markersize=1)
     plt.figure('progress')
     plt.plot(obj['progress']['1'])
     plt.plot(obj['progress']['2'])
+    plt.plot(obj_src['progress']['1'], '.', markersize=1)
+    plt.plot(obj_src['progress']['2'], '.', markersize=1)
     plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)
-
-# utils.read_batch(process_status, start=4)
-# utils.read_batch(process_progress, start=0, num_height=16)
-# save(0,None,'nepal')
-# refine('nepal')

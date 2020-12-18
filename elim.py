@@ -368,22 +368,3 @@ def refine(code):
 
     utils.save_data('health_r', health, 0, None, code)
     utils.save_data('elim_r', elim, 0, None, code)
-
-# utils.read_batch(process_status, start=0, map='volskaya', length=731, num_width=3, num_height=16)
-# utils.read_batch(process_elims, start=20, map='volskaya', length=731, num_width=5, num_height=4)
-
-# save(0,None,'volskaya')
-# refine('volskaya')
-
-# save(0,None,'hanamura')
-# refine('hanamura')
-
-# utils.read_batch(process_elims, start=49, code='junkertown', num_width=5, num_height=4)
-# save(0,None,'junkertown')
-# refine('junkertown')
-
-# utils.read_batch(process_elims, start=28, code='blizzardworld', num_width=5, num_height=4)
-# save(0, None, 'blizzardworld')
-# refine('blizzardworld')
-
-# refine('control_qp')

@@ -159,5 +159,3 @@ def process_map(src):
     return '{}'.format(
         utils.val_to_string(map),
     ), img
-
-# utils.read_batch(process_map, start=0, code='blizzardworld', num_width=2, num_height=6)
