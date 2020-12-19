@@ -179,6 +179,39 @@ def read_heroes(img, rects, templates):
 
     return heroes
 
+def read_duplicate_hero(src, hero, rect, templates):
+    img = utils.crop(src, utils.pad_rect(rect, 5, 5))
+    team = 1 if rect[0] < HERO_RECT_7[0] else 2
+    template = templates[hero]
+    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    loc = np.unravel_index(np.argmax(res), res.shape)
+    img = utils.crop(img, (loc[1], loc[0],template.shape[1],template.shape[0]))
+    assert res[loc] > HERO_THRESHOLD
+
+    mean_img = np.array((
+        np.mean(img[:,:,0]), # B channel
+        np.mean(img[:,:,1]), # G
+        np.mean(img[:,:,2]), # R
+    ))
+    mean_template = np.array((
+        np.mean(template[:,:,0]), # B channel
+        np.mean(template[:,:,1]), # G
+        np.mean(template[:,:,2]), # R
+    ))
+
+    if team == 1:
+        diff = np.abs(mean_img[0]-mean_template[0])
+    else:
+        diff = np.abs(mean_img[2]-mean_template[2])
+    # print(diff, mean_img, mean_template)
+    # cv2.imshow('img', img)
+    # cv2.imshow('temp', template)
+    # cv2.waitKey(0)
+
+    # NOTE: this threshold assumes if echo switches hero, hero won't die immediately
+    # In other words, after switch, the hero icon has to be normal and very very close to the template
+    return diff > 40
+
 save_templates()
 rects = read_rects()
 templates = read_templates()

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import utils
-from hero import HEROES
+import hero
 
 RATIO = 2.0
 
@@ -232,7 +232,7 @@ def read_dva_ult(src, rect, templates):
     else:
         return False
 
-# save_templates()
+save_templates()
 rects = read_rects()
 templates = read_tempaltes()
 
@@ -332,14 +332,14 @@ def refine(code):
     utils.save_data('ult_r', ult, 0, None, code)
 
 def use(code):
-    ult = utils.load_data('ult_r',0,None,code)
-    hero = utils.load_data('hero_r',0,None,code)
+    ult_src = utils.load_data('ult_r',0,None,code)
+    hero_src = utils.load_data('hero_r',0,None,code)
 
     use = {}
     for player in range(1,13):
         player = str(player)
-        ult_data = ult[player]
-        hero_data = hero[player]
+        ult_data = ult_src[player]
+        hero_data = hero_src[player]
         use[player] = [None]*len(ult_data)
         i = 2
         while i < len(ult_data):
@@ -347,10 +347,21 @@ def use(code):
                 pass
             else:
                 if ult_data[i] - ult_data[i-2] < -60: # Use -2 in case ult discharge happens over three frames
-                    # Note: hero can be unknown which will be refined to previous hero
-                    # causing ult back to 0 but hero still the same
-                    if hero_data[i] == hero_data[i-1] and hero_data[i] == hero_data[i+1]: # Hero has to be the same before and after ult use
-                        if HEROES[hero_data[i]] == 'dva':
+                    def no_switch():
+                        # Note: hero can be unknown which will be refined to previous hero
+                        # causing ult back to 0 but hero still the same
+
+                        # Hero has to be the same before and after ult use
+                        return hero_data[i] == hero_data[i-1] and hero_data[i] == hero_data[i+1]
+
+                    if hero.HEROES[hero_data[i-2]] == 'echo': # Duplicate effect takes about one frame
+                        # Check if echo switches hero or duplicated hero just for one frame
+                        for src, frame in utils.read_frames(i, i+1, code):
+                            duplicate_hero = hero.read_duplicate_hero(src, hero.HEROES[hero_data[i+1]], hero.read_rects()[int(player)], hero.read_templates())
+                            print('Check echo ult', player, i, duplicate_hero)
+                        if duplicate_hero: use[player][i] = 1
+                    elif hero.HEROES[hero_data[i]] == 'dva':
+                        if no_switch():
                             # Check if dva actually used bomb and not demech or mech
                             used_ult = False
                             for src, frame in utils.read_frames(i-5, i+1, code):
@@ -358,8 +369,8 @@ def use(code):
                                     used_ult = True
                             print('Checked dva ult', player, i, used_ult)
                             if used_ult: use[player][i] = 1
-                        else:
-                            use[player][i] = 1
+                    else:
+                        if no_switch(): use[player][i] = 1
 
                     i += 1 # Skip next frame to avoid double counting ult drop
             i += 1
@@ -368,26 +379,26 @@ def use(code):
     for player in range(1,7):
         plt.subplot(6,1,player)
         player = str(player)
-        plt.plot(ult[player])
+        plt.plot(ult_src[player])
         plt.plot(use[player],'v')
 
     plt.figure('ult use team 2 ')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         player = str(player)
-        plt.plot(ult[player])
+        plt.plot(ult_src[player])
         plt.plot(use[player],'v')
 
     plt.figure('hero team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
-        plt.plot(hero[str(player)])
+        plt.plot(hero_src[str(player)])
 
     plt.figure('hero team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
-        plt.plot(hero[str(player)])
+        plt.plot(hero_src[str(player)])
     plt.show()
 
     utils.save_data('ult_use', use, 0, None, code)
-# use('hanamura')
+use('numbani')
