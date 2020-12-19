@@ -9,7 +9,7 @@ import map
 import utils
 import matplotlib.pyplot as plt
 
-code = 'busan'
+code = 'numbani'
 
 map_name = None
 for img, frame in utils.read_frames(0,10,code):
@@ -69,6 +69,11 @@ if ult_r_data is None:
     ult.refine(code)
     ult_r_data = utils.load_data('ult_r',0,None,code)
 
+ult_use_data = utils.load_data('ult_use',0,None,code)
+if ult_use_data is None:
+    ult.use(code)
+    ult_use_data = utils.load_data('ult_use',0,None,code)
+
 # Elim
 elim_data = utils.load_data('elim',0,None,code)
 health_data = utils.load_data('health',0,None,code)
@@ -83,6 +88,7 @@ if health_data is None or elim_r_data is None:
     elim_r_data = utils.load_data('elim_r',0,None,code)
 
 assert elim_r_data['heroes'] == hero_r_data['heroes']
+
 heroes_data = elim_r_data['heroes']
 del elim_r_data['heroes']
 del hero_r_data['heroes']
@@ -93,6 +99,7 @@ full_data = {
     'hero': hero_r_data,
     'health': health_r_data,
     'ult': ult_r_data,
+    'ult_use': ult_use_data,
     'elim': elim_r_data,
 }
 

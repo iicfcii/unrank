@@ -10,6 +10,12 @@ def val_to_string(val):
     if val is None: return 'NA'
     return str(val)
 
+def offset_rect(rect, dx, dy):
+    rect = list(rect)
+    rect[0] += dx
+    rect[1] += dy
+    return tuple(rect)
+
 def crop(img, rect):
     x, y, w, h = rect
 
