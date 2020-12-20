@@ -303,10 +303,10 @@ def img_path(code):
 
     return path
 
-def file_path(type, start_frame, end_frame, code):
+def file_path(type, start_frame, end_frame, code, ext='json'):
     return os.path.join(
         data_path(code),
-        '{}_{}_{:d}_{:d}.json'.format(code, type, start_frame, end_frame)
+        '{}_{}_{:d}_{:d}.{}'.format(code, type, start_frame, end_frame, ext)
     )
 
 def count_frames(code):

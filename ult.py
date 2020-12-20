@@ -401,4 +401,3 @@ def use(code):
     plt.show()
 
     utils.save_data('ult_use', use, 0, None, code)
-use('numbani')
