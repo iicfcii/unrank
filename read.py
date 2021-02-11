@@ -94,7 +94,15 @@ def save_data(code):
     del elim_r_data['heroes']
     del hero_r_data['heroes']
 
+    time_data = {
+        'interval': 1,
+        'data': [i for i in range(0,len(obj_r_data['status']))]
+    }
+
+    # TODO: Remove data until map is recognized
     full_data = {
+        'map': map_name,
+        'time': time_data,
         'objective': obj_r_data,
         'heroes': heroes_data,
         'hero': hero_r_data,
@@ -112,6 +120,13 @@ def convert_csv(code):
     file_name = utils.file_path('full', 0, (length-1)*30, code, ext='csv')
 
     titles = []
+
+    map_keys = ['map']
+    titles += map_keys
+
+    time_keys = ['interval', 'time']
+    titles += time_keys
+
     objective_keys = list(full_data['objective'].keys())
     if full_data['objective']['type'] != 'escort':
         objective_keys.remove('progress')
@@ -134,6 +149,18 @@ def convert_csv(code):
 
         for i in range(length):
             row = []
+
+            map_values = []
+            map_values.append(full_data['map'] if i == 0 else None)
+            row += map_values
+
+            time_values = []
+            for key in full_data['time']:
+                if key == 'interval':
+                    time_values.append(full_data['time']['interval'] if i == 0 else None)
+                else:
+                    time_values.append(full_data['time'][key][i])
+            row += time_values
 
             objective_values = []
             for key in full_data['objective']:
@@ -161,6 +188,6 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-code = 'nepal'
+code = 'junkertown'
 save_data(code)
 convert_csv(code)
