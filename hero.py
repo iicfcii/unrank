@@ -139,6 +139,12 @@ def save_templates():
     img_14 = cv2.imread('img/anubis/anubis_9390.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_bastion.jpg', utils.crop(img_14, offset_rect(rects[5], -4, 0)))
 
+    img_15 = cv2.imread('img/blizzardworld/blizzardworld_360.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/hero_unknown_1.jpg', utils.crop(img_15, offset_rect(rects[4], -2, 0)))
+
+    img_16 = cv2.imread('img/blizzardworld/blizzardworld_360.jpg', cv2.IMREAD_COLOR)
+    cv2.imwrite('template/hero_unknown_2.jpg', utils.crop(img_16, offset_rect(rects[9], 4, 1)))
+
 def read_templates():
     templates = {}
 
@@ -147,6 +153,11 @@ def read_templates():
         # Crop image to avoid discorded mismatch
         # TODO: Can try a L shaped mask
         templates[hero] = utils.crop(img, (0,0,12,img.shape[0]))
+
+    templates['unknown'] = {}
+    for team in [1,2]:
+        img = cv2.imread('template/hero_unknown_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
+        templates['unknown'][team] = utils.crop(img, (0,0,12,img.shape[0]))
 
     # cv2.imshow('hero', templates['hanzo'])
     # cv2.waitKey(0)
@@ -159,15 +170,22 @@ def read_hero(src, rect, templates):
     img = utils.crop(src, rect)
 
     scores = []
-    for hero in templates:
+    for hero in HEROES:
         res = cv2.matchTemplate(img, templates[hero], cv2.TM_CCOEFF_NORMED)
         res[np.isnan(res)] = 0
         scores.append((hero, np.max(res)))
+
+    for team in [1,2]:
+        res = cv2.matchTemplate(img, templates['unknown'][team], cv2.TM_CCOEFF_NORMED)
+        res[np.isnan(res)] = 0
+        scores.append(('unknown'+str(team), np.max(res)))
 
     scores.sort(reverse=True, key=lambda s:s[1])
     # print(scores)
     score = scores[0]
     if score[1] > HERO_THRESHOLD:
+        if 'unknown' in score[0]:
+            return None
         return score[0]
     else:
         return None

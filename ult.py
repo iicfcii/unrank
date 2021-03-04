@@ -303,7 +303,8 @@ def refine(code):
             if (
                 ult[player][i] is None and
                 obj['status'][i] is not None and
-                ult[player][i-1] != 0 # After ult won't gain ult within 1 second
+                ult[player][i-1] != 0 and
+                ult[player][i-1] != None# After ult won't gain ult within 1 second
             ):
                 ult[player][i] = 100
         # Remove resurrect, up and almost returns to original percent

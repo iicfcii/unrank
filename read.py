@@ -189,16 +189,16 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-code = '20210303'
-save_data(code)
-convert_csv(code)
+# code = '20210303'
+# save_data(code)
+# convert_csv(code)
 
 # # Check error
-# for src, frame in utils.read_frames(1344, None, '20210303'):
-#     info, img = ult.process_ults(src)
+# for src, frame in utils.read_frames(1080, None, '20210303'):
+#     info, img = hero.process_heroes(src)
 #     print(info)
 #     cv2.imshow('img', img)
 #     cv2.waitKey(0)
 
 # # Redo refine
-# ult.refine(code)
+# hero.refine(code)
