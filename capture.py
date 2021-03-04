@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE, STDOUT, run
 import time
 
 # NOTE: Manually create folder first
-vidName = 'kingsrow'
+vidName = '20210303'
 
 # proc = Popen(
 #     './ffmpeg/ffmpeg -y -f gdigrab -r 30 -i title=Overwatch -c:v h264_nvenc -b:v 5M -vf scale=-1:720 ./vid/gibraltar.mp4',

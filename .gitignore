@@ -1,6 +1,7 @@
 vid/
 img/
 ffmpeg/
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

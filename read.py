@@ -1,4 +1,5 @@
 import csv
+import cv2
 
 import assult
 import control
@@ -188,6 +189,15 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-code = 'junkertown'
+code = '20210303'
 save_data(code)
 convert_csv(code)
+
+# for src, frame in utils.read_frames(1090, None, '20210303'):
+#     info, img = hero.process_heroes(src)
+#     print(info)
+#     cv2.imshow('img', img)
+#     cv2.waitKey(0)
+
+# elim.refine(code)
+# hero.refine(code)

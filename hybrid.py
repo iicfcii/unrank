@@ -261,16 +261,16 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],3,interp=False)
+    obj['status'] = utils.remove_outlier(obj['status'],6,interp=False)
     obj['capturing'] = utils.remove_outlier(obj['capturing'],3,['none','number'])
     obj['capturing'] = utils.remove_outlier(obj['capturing'],1,['change'])
 
-    obj['progress']['point'] = utils.remove_outlier(obj['progress']['point'],3,['none','number','change'])
+    obj['progress']['point'] = utils.remove_outlier(obj['progress']['point'],6,['none','number','change'])
     assult.remove_capture(obj['capturing'], obj['progress']['point'])
 
     # Avoid interpolation between -1 and other value
     # Fill none bewteen number and -1 with number
-    obj['progress']['payload'] = utils.remove_outlier(obj['progress']['payload'],3,min=0)
+    obj['progress']['payload'] = utils.remove_outlier(obj['progress']['payload'],6,min=0)
     obj['progress']['payload'] = utils.remove_outlier(obj['progress']['payload'],2,interp=False)
 
     utils.extend_none(obj['status'], [

@@ -19,7 +19,7 @@ SYMBOL_THRESHOLD = 0.38
 # NOTE: tune tighter so that won't make mistake
 # Elim will appear on multiple frames to make up the missed ones
 TEAM_1_COLOR = np.array((100, 127, 127)) #HSV
-TEAM_1_COLOR_RANGE = np.array((60, 128, 128))
+TEAM_1_COLOR_RANGE = np.array((40, 128, 128))
 TEAM_1_COLOR_LB = TEAM_1_COLOR-TEAM_1_COLOR_RANGE
 TEAM_1_COLOR_UB = TEAM_1_COLOR+TEAM_1_COLOR_RANGE
 
@@ -275,7 +275,6 @@ def refine(code):
         health[str(player)] = utils.remove_outlier(health[str(player)],size=2)
     utils.fix_disconnect(code, health, None)
 
-
     # Find all the deaths for each player
     death = {}
     for player in range(1,13):
@@ -332,7 +331,7 @@ def refine(code):
                         # No duplicate elim possible for a signle frame
                         break
 
-            if h_opp is not None:
+            if h_opp is not None and h_opp != -1:
                 # Find the player
                 team_opp = 1 if p_self > 6 else 2
                 # Extend search range for echo(hero changes when ulting)
@@ -342,7 +341,7 @@ def refine(code):
                         p_opp = p
 
             if p_opp == -1 or h_opp == -1:
-                print('Death {} of player {:d} {} caused by opponent player {:d} {}'.format(d, p_self, HEROES[h_self], p_opp, HEROES[h_opp]))
+                print('Death {} of player {:d} ({},{}) caused by opponent player {:d} ({},{})'.format(d, p_self, h_self, HEROES[h_self], p_opp, h_opp, HEROES[h_opp]))
 
             elim_r[str(p_self)][start] = p_opp
 
