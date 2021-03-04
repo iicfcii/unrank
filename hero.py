@@ -12,7 +12,7 @@ HERO_RECT_7 = (864,48,21,25)
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
-HERO_THRESHOLD = 0.6
+HERO_THRESHOLD = 0.65
 
 HEROES = [
     'ana',
@@ -102,7 +102,7 @@ def save_templates():
     cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
 
     img_4 = cv2.imread('img/volskaya/volskaya_14340.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/hero_mccree.jpg', utils.crop(img_4, offset_rect(rects[3], 2, 0)))
+    cv2.imwrite('template/hero_mccree.jpg', utils.crop(img_4, offset_rect(rects[3], -3, 0)))
     cv2.imwrite('template/hero_widowmaker.jpg', utils.crop(img_4, offset_rect(rects[5], -4, 0)))
 
     img_5 = cv2.imread('img/volskaya/volskaya_21150.jpg', cv2.IMREAD_COLOR)

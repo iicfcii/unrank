@@ -193,11 +193,12 @@ code = '20210303'
 save_data(code)
 convert_csv(code)
 
-# for src, frame in utils.read_frames(1090, None, '20210303'):
-#     info, img = hero.process_heroes(src)
+# # Check error
+# for src, frame in utils.read_frames(1344, None, '20210303'):
+#     info, img = ult.process_ults(src)
 #     print(info)
 #     cv2.imshow('img', img)
 #     cv2.waitKey(0)
 
-# elim.refine(code)
-# hero.refine(code)
+# # Redo refine
+# ult.refine(code)
