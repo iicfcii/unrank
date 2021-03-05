@@ -1,7 +1,7 @@
 import csv
 import cv2
 
-import assult
+import assault
 import control
 import escort
 import hybrid
@@ -27,8 +27,8 @@ def save_data(code):
     # Objective
     obj_data = utils.load_data('obj',0,None,code)
     if obj_data is None:
-        if map_type == 'assult':
-            assult.save(0,None,code)
+        if map_type == 'assault':
+            assault.save(0,None,code)
         if map_type == 'control':
             control.save(0,None,code)
         if map_type == 'escort':
@@ -39,8 +39,8 @@ def save_data(code):
 
     obj_r_data = utils.load_data('obj_r',0,None,code)
     if obj_r_data is None:
-        if map_type == 'assult':
-            assult.refine(code)
+        if map_type == 'assault':
+            assault.refine(code)
         if map_type == 'control':
             control.refine(code)
         if map_type == 'escort':
@@ -189,7 +189,7 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-# code = '20210303'
+# code = 'hanamura'
 # save_data(code)
 # convert_csv(code)
 

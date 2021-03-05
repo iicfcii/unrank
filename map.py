@@ -11,7 +11,7 @@ MAPS = {
     'busan': 'control',
     'dorado': 'escort',
     'eichenwalde': 'hybrid',
-    'hanamura': 'assult',
+    'hanamura': 'assault',
     'havana': 'escort',
     'hollywood': 'hybrid',
     'ilios': 'control',
@@ -23,8 +23,8 @@ MAPS = {
     'oasis': 'control',
     'rialto': 'escort',
     'route66': 'escort',
-    'anubis': 'assult',
-    'volskaya': 'assult',
+    'anubis': 'assault',
+    'volskaya': 'assault',
     'gibraltar': 'escort'
 }
 

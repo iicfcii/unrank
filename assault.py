@@ -35,32 +35,32 @@ TEAM2_COLOR_UB = TEAM2_COLOR+TEAM2_COLOR_RANGE
 
 def save_templates():
     img = cv2.imread('img/hanamura/hanamura_660.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_locked.jpg', utils.crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assault_locked.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_captured.jpg', utils.crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assault_captured.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_3120.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_A_1.jpg', utils.crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assault_A_1.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_11670.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_A_2.jpg', utils.crop(img, ICON_RECT_1))
+    cv2.imwrite('template/assault_A_2.jpg', utils.crop(img, ICON_RECT_1))
 
     img = cv2.imread('img/hanamura/hanamura_5040.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_B_1.jpg', utils.crop(img, ICON_RECT_2))
+    cv2.imwrite('template/assault_B_1.jpg', utils.crop(img, ICON_RECT_2))
 
     img = cv2.imread('img/hanamura/hanamura_15600.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/assult_B_2.jpg', utils.crop(img, ICON_RECT_2))
+    cv2.imwrite('template/assault_B_2.jpg', utils.crop(img, ICON_RECT_2))
 
 def read_tempaltes():
     templates = {}
 
-    img_locked = cv2.imread('template/assult_locked.jpg', cv2.IMREAD_COLOR)
+    img_locked = cv2.imread('template/assault_locked.jpg', cv2.IMREAD_COLOR)
     mask_locked = np.zeros((img_locked.shape[0],img_locked.shape[1]), dtype=np.uint8)
     mask_locked = cv2.fillConvexPoly(mask_locked, ICON_MASK, 255)
     templates['locked'] = (img_locked, mask_locked)
 
-    img_captured = cv2.imread('template/assult_captured.jpg', cv2.IMREAD_COLOR)
+    img_captured = cv2.imread('template/assault_captured.jpg', cv2.IMREAD_COLOR)
     mask_captured= np.zeros((img_captured.shape[0],img_captured.shape[1]), dtype=np.uint8)
     mask_captured = cv2.fillConvexPoly(mask_captured, ICON_MASK, 255)
     templates['captured'] = (img_captured, mask_captured)
@@ -68,7 +68,7 @@ def read_tempaltes():
     for point in ['A', 'B']:
         templates[point] = {}
         for team in [1,2]:
-            img = cv2.imread('template/assult_'+point+'_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
+            img = cv2.imread('template/assault_'+point+'_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
             mask = np.zeros((img.shape[0],img.shape[1]), dtype=np.uint8)
             mask = cv2.fillConvexPoly(mask, ICON_MASK, 255)
             templates[point][team] = (img, mask)
@@ -271,7 +271,7 @@ def process_progress(src):
 
 def save(start, end, code):
     obj = {
-        'type':'assult',
+        'type':'assault',
         'status': [],
         'capturing': [],
         'progress': {

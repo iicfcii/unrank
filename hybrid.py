@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import utils
-import assult
+import assault
 import escort
 
 LOCKED_RECT = (605,82,25,25)
@@ -112,21 +112,21 @@ def read_status(src, templates):
             if score[1] > 0:
                 dy = 15 if score[2][0] > 12 else 11
                 rect_point = (
-                    assult.POINT_RECT[0],
-                    assult.POINT_RECT[1]+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]),
-                    assult.POINT_RECT[2],
-                    assult.POINT_RECT[3]
+                    assault.POINT_RECT[0],
+                    assault.POINT_RECT[1]+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]),
+                    assault.POINT_RECT[2],
+                    assault.POINT_RECT[3]
                 )
                 rect_text = (
-                    assult.TEXT_RECT[0],
-                    assult.TEXT_RECT[1]+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]),
-                    assult.TEXT_RECT[2],
-                    assult.TEXT_RECT[3]
+                    assault.TEXT_RECT[0],
+                    assault.TEXT_RECT[1]+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]),
+                    assault.TEXT_RECT[2],
+                    assault.TEXT_RECT[3]
                 )
                 img = utils.crop(src, STATUS_POINT_RECT)
                 img_point = utils.crop(img, rect_point)
                 img_text = utils.crop(img, rect_text)
-                if assult.read_capture(img_point, img_text,score[1],'A'):
+                if assault.read_capture(img_point, img_text,score[1],'A'):
                     # cv2.imshow('point', img_point)
                     # cv2.imshow('text', img_text)
                     # cv2.waitKey(0)
@@ -189,7 +189,7 @@ def read_progress(src, templates):
             int(STATUS_POINT_RECT[2]/2),
             int(STATUS_POINT_RECT[3]/2+(dy-LOCKED_RECT[1]+STATUS_POINT_RECT[1]))
         )
-        percent = assult.read_point(img, center, team)
+        percent = assault.read_point(img, center, team)
         if percent is None: percent = 0
 
         return status_a, percent, -1
@@ -219,7 +219,7 @@ def process_progress(img):
     status, progress_point, progress_payload = read_progress(img, templates)
     img_progress = utils.crop(img, STATUS_RECT)
 
-    assult.mark_progress(
+    assault.mark_progress(
         img_progress,
         progress_point,
         STATUS_POINT_RECT[0]-STATUS_RECT[0]+STATUS_POINT_RECT[2]/2,
@@ -267,7 +267,7 @@ def refine(code):
 
     obj['progress']['point'] = utils.remove_outlier(obj['progress']['point'],6,['none','number'])
     obj['progress']['point'] = utils.remove_outlier(obj['progress']['point'],3,['change'])
-    assult.remove_capture(obj['capturing'], obj['progress']['point'])
+    assault.remove_capture(obj['capturing'], obj['progress']['point'])
 
     # Avoid interpolation between -1 and other value
     # Fill none bewteen number and -1 with number
