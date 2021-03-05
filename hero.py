@@ -98,7 +98,7 @@ def save_templates():
     img_3 = cv2.imread('img/volskaya/volskaya_7710.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -5, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
-    cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
+    cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 0, 0)))
     cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
 
     img_4 = cv2.imread('img/volskaya/volskaya_14340.jpg', cv2.IMREAD_COLOR)
@@ -182,6 +182,7 @@ def read_hero(src, rect, templates):
 
     scores.sort(reverse=True, key=lambda s:s[1])
     # print(scores)
+    # TODO: Implement special threshold for zen
     score = scores[0]
     if score[1] > HERO_THRESHOLD:
         if 'unknown' in score[0]:

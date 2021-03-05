@@ -194,7 +194,7 @@ def convert_csv(code):
 # convert_csv(code)
 
 # # Check error
-# for src, frame in utils.read_frames(1080, None, '20210303'):
+# for src, frame in utils.read_frames(175, None, code):
 #     info, img = hero.process_heroes(src)
 #     print(info)
 #     cv2.imshow('img', img)
