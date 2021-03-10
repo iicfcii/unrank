@@ -416,6 +416,23 @@ def refine(code):
             other_team = 1 if obj['status'][i] == 2 else 2
             progress_other_team = obj['progress'][str(other_team)][i]
 
+    # Match starts when point is locked and is 30 seconds before point opens
+    for i in range(len(obj['status'])):
+        if obj['status'][i] == 0 and obj['status'][i-1] == -1:
+            obj['status'][i-30:i] = [0]*30
+
+    # Set 0 after round to -1
+    end = False
+    for i in range(len(obj['status'])):
+        if obj['status'][i] == 0 and obj['status'][i-1] > 0:
+            end = True
+
+        if obj['status'][i] == None:
+            end = False
+
+        if end: obj['status'][i] = -1
+            # obj['status'][i-30:i] = [0]*30
+
     # Remove one frame before entering black screen
     utils.extend_none(obj['status'], [
         obj['status'],

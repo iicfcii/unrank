@@ -189,7 +189,7 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-# code = 'hanamura'
+# code = 'junkertown'
 # save_data(code)
 # convert_csv(code)
 
