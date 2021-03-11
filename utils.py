@@ -266,17 +266,17 @@ def read_batch(process, start=0, code='nepal', num_width=8, num_height=8):
     for i in range(start,int(length/num_width/num_height)+1):
         imgs = []
         for j in range(i*num_width*num_height, i*num_width*num_height+num_width*num_height):
-            img = cv2.imread('img/'+code+'/'+code+'_'+str(j*30)+'.jpg', cv2.IMREAD_COLOR)
+            img = cv2.imread('img/'+code+'/'+code+'_'+str(j)+'.png', cv2.IMREAD_COLOR)
             if img is None:
                 img = np.zeros(shape, dtype=np.uint8)
             else:
-                print(j*30)
+                print(j)
                 info, img = process(img)
                 shape = img.shape
 
             if j < length:
                 img = cv2.putText(img, info, (0,img.shape[0]-4), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,0))
-                img = cv2.putText(img, str(j*30), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,0))
+                img = cv2.putText(img, str(j), (0,10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0,255,0))
             imgs.append(img)
 
         imgs_row = []
@@ -322,8 +322,8 @@ def read_frames(start, end, code):
     if end is None: end = count_frames(code)
 
     while i == start or i < end:
-        frame = i*30
-        img = cv2.imread('img/'+code+'/'+code+'_'+str(frame)+'.jpg', cv2.IMREAD_COLOR)
+        frame = i
+        img = cv2.imread('img/'+code+'/'+code+'_'+str(frame)+'.png', cv2.IMREAD_COLOR)
         assert img is not None
 
         i += 1
@@ -334,7 +334,7 @@ def read_frames(start, end, code):
 def save_data(type, data, start, end, code):
     if end is None: end = count_frames(code)-1
 
-    with open(file_path(type, start*30, end*30, code), 'w') as json_file:
+    with open(file_path(type, start, end, code), 'w') as json_file:
         json.dump(data, json_file)
 
 def load_data(type, start, end, code):
@@ -343,7 +343,7 @@ def load_data(type, start, end, code):
     if end < 1: return None
 
     try:
-        with open(file_path(type, start*30, end*30, code)) as f:
+        with open(file_path(type, start, end, code)) as f:
             data = json.load(f)
 
         return data

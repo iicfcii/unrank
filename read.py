@@ -1,5 +1,6 @@
 import csv
 import cv2
+import os
 
 import assault
 import control
@@ -13,6 +14,10 @@ import utils
 import matplotlib.pyplot as plt
 
 def save_data(code):
+    folder_path = './data/{}'.format(code)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
     map_name = None
     for img, frame in utils.read_frames(0,10,code):
         if map_name is None:
@@ -58,7 +63,7 @@ def save_data(code):
     hero_r_data = utils.load_data('hero_r',0,None,code)
     if hero_r_data is None:
         hero.refine(code)
-        hero_data = utils.load_data('hero_r',0,None,code)
+        hero_r_data = utils.load_data('hero_r',0,None,code)
 
     # Ult
     ult_data = utils.load_data('ult',0,None,code)
