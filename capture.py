@@ -105,7 +105,7 @@ def wait_for(img, confidence=0.9):
         location = gui.locateOnScreen(templates[img],confidence=confidence)
         time.sleep(wait_time)
         count += 1
-    assert location is not None, 'Wait for image timeouts'
+    assert location is not None, 'Wait for {} image timeouts'.format(img)
     return location
 
 def click(loc):
@@ -129,7 +129,7 @@ def find(code):
             break
     return location
 
-def record(code):
+def record(code, id):
     try:
         # Import replay and start
         loc = wait_for('overwatch_logo',confidence=0.8) # Wait for game home screen
@@ -171,7 +171,7 @@ def record(code):
 
         # Start screen recording
         proc = subprocess.Popen(
-            'ffmpeg -y -f gdigrab -r 30 -i title=Overwatch -c:v h264_nvenc -b:v 10M ./vid/{}.mp4'.format(code),
+            'ffmpeg -y -f gdigrab -r 30 -i title=Overwatch -c:v h264_nvenc -b:v 10M ./vid/{}.mp4'.format(id),
             stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
 
@@ -195,9 +195,11 @@ def record(code):
         time.sleep(WAIT_AFTER_CLICK)
         gui.press('esc')
         loc = wait_for('overwatch_logo',confidence=0.8)
+
+        return True
     except AssertionError as e:
         print(e)
-        pass
+        return False
 
 def screenshot(code):
     folder_path = './img/{}'.format(code)

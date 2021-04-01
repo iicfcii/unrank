@@ -2,15 +2,31 @@ import read
 import capture
 import server
 
-replay = server.read()
-code = replay.get('code')
-print('Replay code', code)
+def main():
+    replay = server.read()
 
-print('Recording', code)
-# capture.record(code)
-# capture.screenshot(code)
-print('Processing', code)
-read.save_data(code)
-read.convert_csv(code)
+    if replay is None:
+        print('No submitted replay')
+    else:
+        id = replay.get('objectId')
+        code = replay.get('code')
+        print('Replay id', id)
+        print('Replay code', code)
 
-# Upload and link file
+        print('Recording', id)
+        success = capture.record(code, id)
+
+        if not success:
+            print('Failed', id)
+            server.fail(replay)
+            return
+
+        capture.screenshot(id)
+        print('Processing', id)
+        read.save_data(id)
+        read.convert_csv(id)
+
+        server.save(replay)
+        print('Finished', id)
+        
+main()
