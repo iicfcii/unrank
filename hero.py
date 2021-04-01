@@ -9,10 +9,21 @@ HERO_RECT_LEFT = (40,48,410,25)
 HERO_RECT_RIGHT = (835,48,410,25)
 HERO_RECT_1 = (75,48,21,25) # Cant be too wide otherwise discord will affect the match
 HERO_RECT_7 = (864,48,21,25)
+HERO_STAT_WIDTH = 14
+HERO_STAT_HEIGHT = 10
+HERO_MASK = np.array([ # Mask to avoid discord
+    [0, 0],
+    [HERO_RECT_1[2]-HERO_STAT_WIDTH, 0],
+    [HERO_RECT_1[2]-HERO_STAT_WIDTH, HERO_STAT_HEIGHT],
+    [HERO_RECT_1[2]-1, HERO_STAT_HEIGHT],
+    [HERO_RECT_1[2]-1, HERO_RECT_1[3]-1],
+    [0, HERO_RECT_1[3]-1],
+], dtype=np.int32)
+
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
-HERO_THRESHOLD = 0.65
+HERO_THRESHOLD = 0.67
 
 HEROES = [
     'ana',
@@ -85,7 +96,7 @@ def save_templates():
     cv2.imwrite('template/hero_moira.jpg', utils.crop(img_1, rects[1]))
     cv2.imwrite('template/hero_dva.jpg', utils.crop(img_1, rects[2]))
     cv2.imwrite('template/hero_junkrat.jpg', utils.crop(img_1, offset_rect(rects[3], -3, 0)))
-    cv2.imwrite('template/hero_roadhog.jpg', utils.crop(img_1, rects[4]))
+    cv2.imwrite('template/hero_roadhog.jpg', utils.crop(img_1, offset_rect(rects[4], -2, 0)))
     cv2.imwrite('template/hero_ashe.jpg', utils.crop(img_1, rects[8]))
     cv2.imwrite('template/hero_mercy.jpg', utils.crop(img_1, offset_rect(rects[6], -3, 0)))
     cv2.imwrite('template/hero_doomfist.jpg', utils.crop(img_1, offset_rect(rects[7], -2, 0)))
@@ -98,7 +109,7 @@ def save_templates():
     img_3 = cv2.imread('img/volskaya/volskaya_7710.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -5, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
-    cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 0, 0)))
+    cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
     cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
 
     img_4 = cv2.imread('img/volskaya/volskaya_14340.jpg', cv2.IMREAD_COLOR)
@@ -150,16 +161,18 @@ def read_templates():
 
     for hero in HEROES:
         img = cv2.imread('template/hero_'+hero+'.jpg', cv2.IMREAD_COLOR)
-        # Crop image to avoid discorded mismatch
-        # TODO: Can try a L shaped mask
-        templates[hero] = utils.crop(img, (0,0,12,img.shape[0]))
+        mask = np.zeros((HERO_RECT_1[3],HERO_RECT_1[2]), dtype=np.uint8)
+        mask = cv2.fillConvexPoly(mask, HERO_MASK, 255)
+        templates[hero] = (img, mask)
 
     templates['unknown'] = {}
     for team in [1,2]:
         img = cv2.imread('template/hero_unknown_'+str(team)+'.jpg', cv2.IMREAD_COLOR)
-        templates['unknown'][team] = utils.crop(img, (0,0,12,img.shape[0]))
+        templates['unknown'][team] = (img, None)
 
-    # cv2.imshow('hero', templates['hanzo'])
+    # temp, mask = templates['mccree']
+    # temp[mask == 0] = (0,0,0)
+    # cv2.imshow('hero', temp)
     # cv2.waitKey(0)
 
     return templates
@@ -171,17 +184,18 @@ def read_hero(src, rect, templates):
 
     scores = []
     for hero in HEROES:
-        res = cv2.matchTemplate(img, templates[hero], cv2.TM_CCOEFF_NORMED)
+        template, mask = templates[hero]
+        res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
         res[np.isnan(res)] = 0
         scores.append((hero, np.max(res)))
 
     for team in [1,2]:
-        res = cv2.matchTemplate(img, templates['unknown'][team], cv2.TM_CCOEFF_NORMED)
+        res = cv2.matchTemplate(img, templates['unknown'][team][0], cv2.TM_CCOEFF_NORMED)
         res[np.isnan(res)] = 0
         scores.append(('unknown'+str(team), np.max(res)))
 
     scores.sort(reverse=True, key=lambda s:s[1])
-    print(scores)
+    # print(scores)
     # TODO: Implement special threshold for zen
     score = scores[0]
     if score[1] > HERO_THRESHOLD:
@@ -201,8 +215,8 @@ def read_heroes(img, rects, templates):
 def read_duplicate_hero(src, hero, rect, templates):
     img = utils.crop(src, utils.pad_rect(rect, 5, 5))
     team = 1 if rect[0] < HERO_RECT_7[0] else 2
-    template = templates[hero]
-    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    template, mask = templates[hero]
+    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
     loc = np.unravel_index(np.argmax(res), res.shape)
     img = utils.crop(img, (loc[1], loc[0],template.shape[1],template.shape[0]))
     assert res[loc] > HERO_THRESHOLD
@@ -266,8 +280,6 @@ def save(start, end, code):
 
         for i, h in enumerate(heroes):
             hero[i+1].append(HEROES.index(h) if h is not None else -1)
-
-        print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('hero', hero, start, end, code)
 

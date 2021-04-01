@@ -326,6 +326,7 @@ def read_frames(start, end, code):
         img = cv2.imread('img/'+code+'/'+code+'_'+str(frame)+'.png', cv2.IMREAD_COLOR)
         assert img is not None
 
+        print('Read frame {:d}'.format(frame))
         i += 1
         yield img, frame
 

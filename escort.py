@@ -152,8 +152,6 @@ def save(start, end, code):
         obj['status'].append(status)
         obj['progress'].append(progress)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('obj', obj, start, end, code)
 
 def refine(code):

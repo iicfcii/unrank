@@ -322,8 +322,6 @@ def save(start, end, code):
                 obj['progress'][1].append(None)
                 obj['progress'][2].append(percent)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('obj', obj, start, end, code)
 
 def refine(code):

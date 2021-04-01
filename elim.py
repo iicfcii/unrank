@@ -258,7 +258,6 @@ def save(start, end, code):
                     ])
 
         elim['data'].append(elims_frame)
-        print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('health', health, start, end, code)
     utils.save_data('elim', elim, start, end, code)

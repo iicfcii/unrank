@@ -280,8 +280,6 @@ def save(start, end, code):
         for i, percent in enumerate(percents):
             ult[i+1].append(percent)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('ult', ult, start, end, code)
 
 def refine(code):

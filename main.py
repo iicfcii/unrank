@@ -6,10 +6,10 @@ replay = server.read()
 code = replay.get('code')
 print('Replay code', code)
 
-print('Start recording', code)
+print('Recording', code)
 # capture.record(code)
 # capture.screenshot(code)
-print('Processing data', code)
+print('Processing', code)
 read.save_data(code)
 read.convert_csv(code)
 

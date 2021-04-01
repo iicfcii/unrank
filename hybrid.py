@@ -254,8 +254,6 @@ def save(start, end, code):
         obj['progress']['point'].append(progress_point)
         obj['progress']['payload'].append(progress_payload)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('obj', obj, start, end, code)
 
 def refine(code):

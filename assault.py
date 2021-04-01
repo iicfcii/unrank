@@ -289,7 +289,6 @@ def save(start, end, code):
         obj['capturing'].append(capturing)
         obj['progress']['A'].append(progress_A)
         obj['progress']['B'].append(progress_B)
-        print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('obj', obj, start, end, code)
 
