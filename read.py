@@ -1,6 +1,7 @@
 import csv
 import cv2
 import os
+from datetime import datetime
 
 import assault
 import control
@@ -93,6 +94,7 @@ def save_data(code):
     if health_data is None or elim_r_data is None:
         elim.refine(code)
         elim_r_data = utils.load_data('elim_r',0,None,code)
+        health_r_data = utils.load_data('health_r',0,None,code)
 
     # assert elim_r_data['heroes'] == hero_r_data['heroes']
 
@@ -107,6 +109,7 @@ def save_data(code):
 
     # TODO: Remove data until map is recognized
     full_data = {
+        'creation_time': str(datetime.utcnow()),
         'map': map_name,
         'time': time_data,
         'objective': obj_r_data,
@@ -123,9 +126,12 @@ def save_data(code):
 def convert_csv(code):
     length = utils.count_frames(code)
     full_data = utils.load_data('full',0,None,code)
-    file_name = utils.file_path('full', 0, (length-1)*30, code, ext='csv')
+    file_name = utils.file_path('full',0,(length-1),code,ext='csv')
 
     titles = []
+
+    creation_time_keys = ['creation_time']
+    titles += creation_time_keys
 
     map_keys = ['map']
     titles += map_keys
@@ -155,6 +161,10 @@ def convert_csv(code):
 
         for i in range(length):
             row = []
+
+            creation_time_values = []
+            creation_time_values.append(full_data['creation_time'] if i == 0 else None)
+            row += creation_time_values
 
             map_values = []
             map_values.append(full_data['map'] if i == 0 else None)
