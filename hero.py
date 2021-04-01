@@ -181,7 +181,7 @@ def read_hero(src, rect, templates):
         scores.append(('unknown'+str(team), np.max(res)))
 
     scores.sort(reverse=True, key=lambda s:s[1])
-    # print(scores)
+    print(scores)
     # TODO: Implement special threshold for zen
     score = scores[0]
     if score[1] > HERO_THRESHOLD:

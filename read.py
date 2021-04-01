@@ -194,16 +194,14 @@ def convert_csv(code):
 
             writer.writerow(row)
 
-# code = 'junkertown'
+# code = 'Y1DZV3'
 # save_data(code)
 # convert_csv(code)
-
-# # Check error
-# for src, frame in utils.read_frames(175, None, code):
+# Check error
+# for src, frame in utils.read_frames(390, None, code):
 #     info, img = hero.process_heroes(src)
 #     print(info)
 #     cv2.imshow('img', img)
 #     cv2.waitKey(0)
-
-# # Redo refine
+# Redo refine
 # hero.refine(code)

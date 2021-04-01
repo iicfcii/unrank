@@ -12,4 +12,5 @@ dependencies:
     # https://github.com/numpy/numpy/wiki/FMod-Bug-on-Windows
     - matplotlib
     - pyautogui
+    - leancloud
     # ffmpeg is also required
