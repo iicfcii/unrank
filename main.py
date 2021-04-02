@@ -28,5 +28,5 @@ def main():
 
         server.save(replay)
         print('Finished', id)
-        
+
 main()

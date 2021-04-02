@@ -28,12 +28,13 @@ def save(replay):
     length = utils.count_frames(id)
     file_name = utils.file_path('full',0,(length-1),id,ext='json')
     with open(file_name, 'rb') as f:
-        file = leancloud.File(file_name.split('\\')[-1], f)
+        # Default application/json causes cors issues.
+        file = leancloud.File(file_name.split('\\')[-1], f, 'application/octet-stream')
         file.save()
 
     csv_file_name = utils.file_path('full',0,(length-1),id,ext='csv')
     with open(csv_file_name, 'rb') as f:
-        csv_file = leancloud.File(csv_file_name.split('\\')[-1], f)
+        csv_file = leancloud.File(csv_file_name.split('\\')[-1], f, 'application/octet-stream')
         csv_file.save()
 
     replay.set('json', file)
