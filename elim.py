@@ -65,10 +65,10 @@ def read_rects():
 def save_templates():
     rects = read_rects()
 
-    img = cv2.imread('img/volskaya/volskaya_3060.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_3060.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/elim_1.jpg', utils.crop(img, rects[3]))
 
-    img = cv2.imread('img/volskaya/volskaya_15570.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_15570.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/elim_7.jpg', utils.crop(img, rects[12]))
 
 def read_templates():

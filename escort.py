@@ -32,13 +32,13 @@ STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
 STATUS_THRESHOLD = 0.8
 
 def save_templates():
-    img = cv2.imread('img/rialto/rialto_10560.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_10560.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_locked.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/rialto/rialto_1530.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_1530.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_payload_2.jpg', utils.crop(img, PAYLOAD_RECT))
 
-    img = cv2.imread('img/rialto/rialto_11610.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_11610.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_payload_1.jpg', utils.crop(img, PAYLOAD_RECT))
 
     # cv2.imshow('img', utils.crop(img, PAYLOAD_RECT))

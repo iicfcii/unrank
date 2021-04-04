@@ -22,16 +22,16 @@ STATUS_PAYLOAD_RECT = (538,71,escort.PAYLOAD_RECT_WIDTH,46)
 STATUS_THRESHOLD = 0.6
 
 def save_templates():
-    img = cv2.imread('img/numbani/numbani_1530.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_1530.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_locked.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_14670.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_14670.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_captured.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_2070.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_2070.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_point_1.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_16650.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_16650.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_point_2.jpg', utils.crop(img, LOCKED_RECT))
 
     # cv2.imshow('img', utils.crop(img, LOCKED_RECT))

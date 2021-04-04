@@ -31,87 +31,79 @@ MAPS = {
 def save_templates():
     # 1118
     rect = (678,627,440,60)
-    img = cv2.imread('img/anubis/anubis_270.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/anubis_270.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_anubis.jpg', utils.crop(img, rect))
 
     rect = (706,627,412,60)
-    img = cv2.imread('img/blizzardworld/blizzardworld_300.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/blizzardworld_300.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_blizzardworld.jpg', utils.crop(img, rect))
 
     rect = (820,627,298,60)
-    img = cv2.imread('img/hanamura/hanamura_240.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_240.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_hanamura.jpg', utils.crop(img, rect))
 
     rect = (782,627,336,60)
-    img = cv2.imread('img/junkertown/junkertown_180.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/junkertown_180.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_junkertown.jpg', utils.crop(img, rect))
 
     rect = (950,627,168,60)
-    img = cv2.imread('img/nepal/nepal_300.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/nepal_300.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_nepal.jpg', utils.crop(img, rect))
 
     rect = (862,627,256,60)
-    img = cv2.imread('img/numbani/numbani_210.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_210.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_numbani.jpg', utils.crop(img, rect))
 
     rect = (914,627,204,60)
-    img = cv2.imread('img/rialto/rialto_150.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_150.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_rialto.jpg', utils.crop(img, rect))
 
     rect = (596,627,522,60)
-    img = cv2.imread('img/volskaya/volskaya_150.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_150.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_volskaya.jpg', utils.crop(img, rect))
 
     rect = (912,627,206,60)
-    img = cv2.imread('img/busan/busan_150.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/map_busan.jpg', utils.crop(img, rect))
-
-    rect = (912,627,206,60)
-    img = cv2.imread('img/busan/busan_150.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/busan_150.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_busan.jpg', utils.crop(img, rect))
 
     rect = (948,627,170,60)
-    img = cv2.imread('img/maps_1/maps_1_150.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_1_150.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_ilios.jpg', utils.crop(img, rect))
 
     rect = (546,627,572,60)
-    img = cv2.imread('img/maps_1/maps_1_450.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/map_gibraltar.jpg', utils.crop(img, rect))
-
-    rect = (546,627,572,60)
-    img = cv2.imread('img/maps_1/maps_1_450.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_1_450.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_gibraltar.jpg', utils.crop(img, rect))
 
     rect = (886,627,232,60)
-    img = cv2.imread('img/maps_1/maps_1_1290.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_1_1290.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_havana.jpg', utils.crop(img, rect))
 
     rect = (808,627,310,60)
-    img = cv2.imread('img/maps_1/maps_1_1860.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_1_1860.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_kingsrow.jpg', utils.crop(img, rect))
 
     rect = (926,627,192,60)
-    img = cv2.imread('img/maps_2/maps_2_180.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_2_180.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_oasis.jpg', utils.crop(img, rect))
 
     rect = (776,627,342,60)
-    img = cv2.imread('img/maps_2/maps_2_510.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_2_510.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_eichenwalde.jpg', utils.crop(img, rect))
 
     rect = (806,627,312,60)
-    img = cv2.imread('img/maps_2/maps_2_960.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_2_960.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_hollywood.jpg', utils.crop(img, rect))
 
     rect = (750,627,368,60)
-    img = cv2.imread('img/maps_3/maps_3_180.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_3_180.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_lijiangtower.jpg', utils.crop(img, rect))
 
     rect = (854,627,264,60)
-    img = cv2.imread('img/maps_3/maps_3_420.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_3_420.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_route66.jpg', utils.crop(img, rect))
 
     rect = (882,627,236,60)
-    img = cv2.imread('img/maps_3/maps_3_600.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/maps_3_600.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/map_dorado.jpg', utils.crop(img, rect))
 
     # cv2.imshow('img', utils.crop(img, rect))

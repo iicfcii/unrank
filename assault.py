@@ -34,22 +34,22 @@ TEAM2_COLOR_LB = TEAM2_COLOR-TEAM2_COLOR_RANGE
 TEAM2_COLOR_UB = TEAM2_COLOR+TEAM2_COLOR_RANGE
 
 def save_templates():
-    img = cv2.imread('img/hanamura/hanamura_660.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_660.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_locked.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_4440.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_captured.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_3120.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_3120.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_A_1.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_11670.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_11670.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_A_2.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_5040.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_5040.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_B_1.jpg', utils.crop(img, ICON_RECT_2))
 
-    img = cv2.imread('img/hanamura/hanamura_15600.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_15600.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_B_2.jpg', utils.crop(img, ICON_RECT_2))
 
 def read_tempaltes():

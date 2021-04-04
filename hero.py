@@ -92,7 +92,7 @@ def read_rects():
 def save_templates():
     rects = read_rects()
 
-    img_1 = cv2.imread('img/volskaya/volskaya_1860.jpg', cv2.IMREAD_COLOR)
+    img_1 = cv2.imread('template_src/volskaya_1860.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_moira.jpg', utils.crop(img_1, rects[1]))
     cv2.imwrite('template/hero_dva.jpg', utils.crop(img_1, rects[2]))
     cv2.imwrite('template/hero_junkrat.jpg', utils.crop(img_1, offset_rect(rects[3], -3, 0)))
@@ -103,58 +103,56 @@ def save_templates():
     cv2.imwrite('template/hero_wreckingball.jpg', utils.crop(img_1, rects[10]))
     cv2.imwrite('template/hero_ana.jpg', utils.crop(img_1, offset_rect(rects[11], -4, 0)))
 
-    img_2 = cv2.imread('img/volskaya/volskaya_3900.jpg', cv2.IMREAD_COLOR)
+    img_2 = cv2.imread('template_src/volskaya_3900.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_soldier76.jpg', utils.crop(img_2, offset_rect(rects[3], -3, 0)))
 
-    img_3 = cv2.imread('img/volskaya/volskaya_7710.jpg', cv2.IMREAD_COLOR)
+    img_3 = cv2.imread('template_src/volskaya_7710.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -5, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
     cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
     cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
 
-    img_4 = cv2.imread('img/volskaya/volskaya_14340.jpg', cv2.IMREAD_COLOR)
+    img_4 = cv2.imread('template_src/volskaya_14340.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_mccree.jpg', utils.crop(img_4, offset_rect(rects[3], -3, 0)))
     cv2.imwrite('template/hero_widowmaker.jpg', utils.crop(img_4, offset_rect(rects[5], -4, 0)))
 
-    img_5 = cv2.imread('img/volskaya/volskaya_21150.jpg', cv2.IMREAD_COLOR)
+    img_5 = cv2.imread('template_src/volskaya_21150.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_genji.jpg', utils.crop(img_5, rects[5]))
     cv2.imwrite('template/hero_tracer.jpg', utils.crop(img_5, offset_rect(rects[8], 6, 0)))
 
-    img_7 = cv2.imread('img/rialto/rialto_1260.jpg', cv2.IMREAD_COLOR)
+    img_7 = cv2.imread('template_src/rialto_1260.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_hanzo.jpg', utils.crop(img_7, offset_rect(rects[7], 8, 0)))
     cv2.imwrite('template/hero_sigma.jpg', utils.crop(img_7, offset_rect(rects[10], 6, 0)))
     cv2.imwrite('template/hero_echo.jpg', utils.crop(img_7, offset_rect(rects[12], 4, 0)))
 
-    img_8 = cv2.imread('img/hanamura/hanamura_1260.jpg', cv2.IMREAD_COLOR)
+    img_8 = cv2.imread('template_src/hanamura_1260.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_sombra.jpg', utils.crop(img_8, offset_rect(rects[1],-7, 0)))
     cv2.imwrite('template/hero_zenyatta.jpg', utils.crop(img_8, rects[3]))
     cv2.imwrite('template/hero_reaper.jpg', utils.crop(img_8, offset_rect(rects[9], 2, 0)))
 
-    img_9 = cv2.imread('img/hanamura/hanamura_38910.jpg', cv2.IMREAD_COLOR)
+    img_9 = cv2.imread('template_src/hanamura_38910.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_symmetra.jpg', utils.crop(img_9, offset_rect(rects[7], 4, 0)))
 
-    img_10 = cv2.imread('img/numbani/numbani_3030.jpg', cv2.IMREAD_COLOR)
+    img_10 = cv2.imread('template_src/numbani_3030.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_torbjorn.jpg', utils.crop(img_10, offset_rect(rects[1], 2, 0)))
     cv2.imwrite('template/hero_lucio.jpg', utils.crop(img_10, rects[9]))
 
-    img_11 = cv2.imread('img/numbani/numbani_16200.jpg', cv2.IMREAD_COLOR)
+    img_11 = cv2.imread('template_src/numbani_16200.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_winston.jpg', utils.crop(img_11, rects[4]))
     cv2.imwrite('template/hero_orisa.jpg', utils.crop(img_11, rects[12]))
 
-    img_12 = cv2.imread('img/nepal/nepal_16530.jpg', cv2.IMREAD_COLOR)
+    img_12 = cv2.imread('template_src/nepal_16530.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_pharah.jpg', utils.crop(img_12, offset_rect(rects[1], 2, 0)))
 
-    img_13 = cv2.imread('img/nepal/nepal_20700.jpg', cv2.IMREAD_COLOR)
+    img_13 = cv2.imread('template_src/nepal_20700.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_brigitte.jpg', utils.crop(img_13, rects[5]))
 
-    img_14 = cv2.imread('img/anubis/anubis_9390.jpg', cv2.IMREAD_COLOR)
+    img_14 = cv2.imread('template_src/anubis_9390.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_bastion.jpg', utils.crop(img_14, offset_rect(rects[5], -4, 0)))
 
-    img_15 = cv2.imread('img/blizzardworld/blizzardworld_360.jpg', cv2.IMREAD_COLOR)
+    img_15 = cv2.imread('template_src/blizzardworld_360.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_unknown_1.jpg', utils.crop(img_15, offset_rect(rects[4], -2, 0)))
-
-    img_16 = cv2.imread('img/blizzardworld/blizzardworld_360.jpg', cv2.IMREAD_COLOR)
-    cv2.imwrite('template/hero_unknown_2.jpg', utils.crop(img_16, offset_rect(rects[9], 4, 1)))
+    cv2.imwrite('template/hero_unknown_2.jpg', utils.crop(img_15, offset_rect(rects[9], 4, 1)))
 
 def read_templates():
     templates = {}
