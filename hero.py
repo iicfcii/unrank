@@ -110,7 +110,7 @@ def save_templates():
     cv2.imwrite('template/hero_zarya.jpg', utils.crop(img_3, offset_rect(rects[2], -5, 0)))
     cv2.imwrite('template/hero_mei.jpg', utils.crop(img_3, rects[3]))
     cv2.imwrite('template/hero_reinhardt.jpg', utils.crop(img_3, offset_rect(rects[12], 3, 0)))
-    cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -5, 0)))
+    cv2.imwrite('template/hero_baptiste.jpg', utils.crop(img_3, offset_rect(rects[9], -3, 0)))
 
     img_4 = cv2.imread('template_src/volskaya_14340.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hero_mccree.jpg', utils.crop(img_4, offset_rect(rects[3], -3, 0)))
