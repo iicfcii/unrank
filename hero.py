@@ -316,18 +316,19 @@ def refine(code):
     utils.extend_none(obj['status'], [hero[str(p)] for p in range(1,13)], size=0)
 
     hero_src = utils.load_data('hero',0,None,code)
-    plt.figure('status')
-    plt.plot(obj['status'])
     plt.figure('hero team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(hero[str(player)])
         plt.plot(hero_src[str(player)], '.', markersize=1)
+    utils.save_fig(utils.file_path('fig_hero_1',0,len(hero['1'])-1,code,ext='png'))
+
     plt.figure('hero team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(hero[str(player)])
         plt.plot(hero_src[str(player)], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_hero_2',0,len(hero['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('hero_r', hero, 0, None, code)

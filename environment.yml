@@ -3,6 +3,7 @@
 name: unrank
 dependencies:
   - python=3.8
+  - conda-forge::ffmpeg
   - pip
   - pip:
     - opencv-contrib-python

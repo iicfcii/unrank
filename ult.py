@@ -316,21 +316,21 @@ def refine(code):
         )
 
     ult_src = utils.load_data('ult',0,None,code)
-    plt.figure('status')
-    plt.plot(obj['status'])
 
     plt.figure('ult team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(ult[str(player)])
         plt.plot(ult_src[str(player)], '.', markersize=1)
+    utils.save_fig(utils.file_path('fig_ult_1',0,len(ult['1'])-1,code,ext='png'))
 
     plt.figure('ult team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(ult[str(player)])
         plt.plot(ult_src[str(player)], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_ult_2',0,len(ult['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('ult_r', ult, 0, None, code)
 
@@ -384,6 +384,7 @@ def use(code):
         player = str(player)
         plt.plot(ult_src[player])
         plt.plot(use[player],'v')
+    utils.save_fig(utils.file_path('fig_ult_use_1',0,len(ult_src['1'])-1,code,ext='png'))
 
     plt.figure('ult use team 2 ')
     for player in range(7,13):
@@ -391,16 +392,7 @@ def use(code):
         player = str(player)
         plt.plot(ult_src[player])
         plt.plot(use[player],'v')
-
-    plt.figure('hero team 1')
-    for player in range(1,7):
-        plt.subplot(6,1,player)
-        plt.plot(hero_src[str(player)])
-
-    plt.figure('hero team 2')
-    for player in range(7,13):
-        plt.subplot(6,1,player-6)
-        plt.plot(hero_src[str(player)])
-    plt.show()
+    utils.save_fig(utils.file_path('fig_ult_use_2',0,len(ult_src['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('ult_use', use, 0, None, code)

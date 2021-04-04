@@ -355,6 +355,7 @@ def refine(code):
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
         plt.plot(elim[str(player)],'v')
+    utils.save_fig(utils.file_path('fig_elim_1',0,len(elim['1'])-1,code,ext='png'))
 
     plt.figure('team 2')
     for player in range(7,13):
@@ -362,7 +363,8 @@ def refine(code):
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
         plt.plot(elim[str(player)],'v')
-    plt.show()
+    utils.save_fig(utils.file_path('fig_elim_2',0,len(elim['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('health_r', health, 0, None, code)
     utils.save_data('elim_r', elim, 0, None, code)

@@ -170,6 +170,9 @@ def record(code, id):
             click(gui.center(loc))
 
         # Start screen recording
+        folder_path = './vid'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
         proc = subprocess.Popen(
             'ffmpeg -y -f gdigrab -r 30 -i title=Overwatch -c:v h264_nvenc -b:v 10M ./vid/{}.mp4'.format(id),
             stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL

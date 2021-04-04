@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import json
+import matplotlib.pyplot as plt
 
 DATA_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'data')
 IMG_FOLDER_PATH = os.path.join(os.path.dirname(__file__), 'img')
@@ -350,3 +351,9 @@ def load_data(type, start, end, code):
         return data
     except FileNotFoundError:
         return None
+
+def save_fig(file_name):
+    plt.savefig(
+        file_name,
+        dpi=150
+    )
