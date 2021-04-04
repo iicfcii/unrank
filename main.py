@@ -29,4 +29,18 @@ def main():
         server.save(replay)
         print('Finished', id)
 
+def override(id):
+    replay = server.replay(id)
+    id = replay.get('objectId')
+    code = replay.get('code')
+    print('Replay id', id)
+    print('Replay code', code)
+
+    print('Processing', id)
+    read.save_data(id)
+    read.convert_csv(id)
+
+    server.save(replay)
+    print('Finished', id)
+
 main()

@@ -10,6 +10,13 @@ STAT_FAILED = 3
 
 leancloud.init('vNMcfOQkbIrK2mv1HCODUDie-MdYXbMMI', 'UDpxy5slHSvQQUzenUabBURS')
 
+def replay(id):
+    replayQ = leancloud.Query('Replay')
+    replayQ.equal_to('objectId', id)
+    replay = replayQ.first()
+
+    return replay
+
 def read():
     replayQ = leancloud.Query('Replay')
     replayQ.equal_to('status', STAT_SUBMITTED)
