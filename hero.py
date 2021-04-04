@@ -23,7 +23,7 @@ HERO_MASK = np.array([ # Mask to avoid discord
 STAT_RECT_X_OFFSET = 71
 MATCH_PADDING = 10
 
-HERO_THRESHOLD = 0.67
+HERO_THRESHOLD = 0.7
 
 HEROES = [
     'ana',
