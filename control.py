@@ -64,7 +64,7 @@ def save_templates():
 
     img = cv2.imread('template_src/nepal_20670.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/control_a_0.jpg', utils.crop(img, UNLOCKED_RECT))
-    img = cv2.imread('img/control_a1/control_a1_240.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/control_a1_240.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/control_a_1.jpg', utils.crop(img, UNLOCKED_RECT))
     img = cv2.imread('template_src/nepal_20880.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/control_a_2.jpg', utils.crop(img, UNLOCKED_RECT))
