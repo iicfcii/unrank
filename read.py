@@ -1,5 +1,7 @@
 import csv
 import cv2
+import os
+from datetime import datetime
 
 import assault
 import control
@@ -13,6 +15,10 @@ import utils
 import matplotlib.pyplot as plt
 
 def save_data(code):
+    folder_path = './data/{}'.format(code)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
     map_name = None
     for img, frame in utils.read_frames(0,10,code):
         if map_name is None:
@@ -58,7 +64,7 @@ def save_data(code):
     hero_r_data = utils.load_data('hero_r',0,None,code)
     if hero_r_data is None:
         hero.refine(code)
-        hero_data = utils.load_data('hero_r',0,None,code)
+        hero_r_data = utils.load_data('hero_r',0,None,code)
 
     # Ult
     ult_data = utils.load_data('ult',0,None,code)
@@ -88,6 +94,7 @@ def save_data(code):
     if health_data is None or elim_r_data is None:
         elim.refine(code)
         elim_r_data = utils.load_data('elim_r',0,None,code)
+        health_r_data = utils.load_data('health_r',0,None,code)
 
     # assert elim_r_data['heroes'] == hero_r_data['heroes']
 
@@ -102,6 +109,7 @@ def save_data(code):
 
     # TODO: Remove data until map is recognized
     full_data = {
+        'creation_time': str(datetime.utcnow()),
         'map': map_name,
         'time': time_data,
         'objective': obj_r_data,
@@ -118,9 +126,12 @@ def save_data(code):
 def convert_csv(code):
     length = utils.count_frames(code)
     full_data = utils.load_data('full',0,None,code)
-    file_name = utils.file_path('full', 0, (length-1)*30, code, ext='csv')
+    file_name = utils.file_path('full',0,(length-1),code,ext='csv')
 
     titles = []
+
+    creation_time_keys = ['creation_time']
+    titles += creation_time_keys
 
     map_keys = ['map']
     titles += map_keys
@@ -150,6 +161,10 @@ def convert_csv(code):
 
         for i in range(length):
             row = []
+
+            creation_time_values = []
+            creation_time_values.append(full_data['creation_time'] if i == 0 else None)
+            row += creation_time_values
 
             map_values = []
             map_values.append(full_data['map'] if i == 0 else None)
@@ -188,17 +203,3 @@ def convert_csv(code):
                 row += values
 
             writer.writerow(row)
-
-# code = 'junkertown'
-# save_data(code)
-# convert_csv(code)
-
-# # Check error
-# for src, frame in utils.read_frames(175, None, code):
-#     info, img = hero.process_heroes(src)
-#     print(info)
-#     cv2.imshow('img', img)
-#     cv2.waitKey(0)
-
-# # Redo refine
-# hero.refine(code)

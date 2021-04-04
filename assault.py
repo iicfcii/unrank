@@ -34,22 +34,22 @@ TEAM2_COLOR_LB = TEAM2_COLOR-TEAM2_COLOR_RANGE
 TEAM2_COLOR_UB = TEAM2_COLOR+TEAM2_COLOR_RANGE
 
 def save_templates():
-    img = cv2.imread('img/hanamura/hanamura_660.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_660.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_locked.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_4440.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_4440.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_captured.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_3120.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_3120.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_A_1.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_11670.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_11670.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_A_2.jpg', utils.crop(img, ICON_RECT_1))
 
-    img = cv2.imread('img/hanamura/hanamura_5040.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_5040.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_B_1.jpg', utils.crop(img, ICON_RECT_2))
 
-    img = cv2.imread('img/hanamura/hanamura_15600.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/hanamura_15600.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/assault_B_2.jpg', utils.crop(img, ICON_RECT_2))
 
 def read_tempaltes():
@@ -289,7 +289,6 @@ def save(start, end, code):
         obj['capturing'].append(capturing)
         obj['progress']['A'].append(progress_A)
         obj['progress']['B'].append(progress_B)
-        print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('obj', obj, start, end, code)
 
@@ -340,13 +339,18 @@ def refine(code):
     obj_src = utils.load_data('obj',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
+    utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
+
     plt.figure('capturing')
     plt.plot(obj['capturing'])
+    utils.save_fig(utils.file_path('fig_capturing',0,len(obj['status'])-1,code,ext='png'))
+
     plt.figure('progress')
     plt.plot(obj['progress']['A'])
     plt.plot(obj['progress']['B'])
     plt.plot(obj_src['progress']['A'], '.', markersize=1)
     plt.plot(obj_src['progress']['B'], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_progress',0,len(obj['status'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)

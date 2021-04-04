@@ -3,6 +3,7 @@
 name: unrank
 dependencies:
   - python=3.8
+  - conda-forge::ffmpeg
   - pip
   - pip:
     - opencv-contrib-python
@@ -11,3 +12,6 @@ dependencies:
     # numpy 1.19.4 has a bug
     # https://github.com/numpy/numpy/wiki/FMod-Bug-on-Windows
     - matplotlib
+    - pyautogui
+    - leancloud
+    # ffmpeg is also required

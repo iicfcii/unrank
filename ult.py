@@ -46,53 +46,53 @@ ULT_7_MASK = np.array([
 ], dtype=np.int32)
 
 def save_templates():
-    img = cv2.imread('img/volskaya/volskaya_1590.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1590.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_0_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1620.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1620.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_1_2.jpg', utils.crop(img, ULT_1_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1800.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1800.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_2_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1860.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1860.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_3_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1950.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1950.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_4_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_2250.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_2250.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_5_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1980.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1980.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_6_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_2010.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_2010.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_7_2.jpg', utils.crop(img, ULT_7_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_2070.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_2070.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_8_2.jpg', utils.crop(img, ULT_0_2_RECT))
-    img = cv2.imread('img/volskaya/volskaya_3630.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_3630.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_9_2.jpg', utils.crop(img, ULT_0_2_RECT))
 
-    img = cv2.imread('img/volskaya/volskaya_1620.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1620.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_0_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1710.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1710.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_1_1.jpg', utils.crop(img, ULT_1_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1740.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1740.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_2_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_1860.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_1860.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_3_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_3810.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_3810.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_4_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_2160.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_2160.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_5_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_4560.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_4560.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_6_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_4740.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_4740.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_7_1.jpg', utils.crop(img, ULT_7_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_4770.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_4770.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_8_1.jpg', utils.crop(img, ULT_0_1_RECT))
-    img = cv2.imread('img/volskaya/volskaya_4620.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_4620.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_9_1.jpg', utils.crop(img, ULT_0_1_RECT))
 
 
     rects = read_rects()
-    img = cv2.imread('img/junkertown/junkertown_23730.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/junkertown_23730.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_dva_1.jpg', utils.crop(img, rects[6]))
-    img = cv2.imread('img/junkertown/junkertown_6210.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/junkertown_6210.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/ult_dva_2.jpg', utils.crop(img, utils.offset_rect(rects[8], 2, 0)))
 
     # cv2.imshow('img', utils.crop(img, utils.offset_rect(rects[8], 2, 0)))
@@ -280,8 +280,6 @@ def save(start, end, code):
         for i, percent in enumerate(percents):
             ult[i+1].append(percent)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('ult', ult, start, end, code)
 
 def refine(code):
@@ -318,21 +316,21 @@ def refine(code):
         )
 
     ult_src = utils.load_data('ult',0,None,code)
-    plt.figure('status')
-    plt.plot(obj['status'])
 
     plt.figure('ult team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(ult[str(player)])
         plt.plot(ult_src[str(player)], '.', markersize=1)
+    utils.save_fig(utils.file_path('fig_ult_1',0,len(ult['1'])-1,code,ext='png'))
 
     plt.figure('ult team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(ult[str(player)])
         plt.plot(ult_src[str(player)], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_ult_2',0,len(ult['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('ult_r', ult, 0, None, code)
 
@@ -386,6 +384,7 @@ def use(code):
         player = str(player)
         plt.plot(ult_src[player])
         plt.plot(use[player],'v')
+    utils.save_fig(utils.file_path('fig_ult_use_1',0,len(ult_src['1'])-1,code,ext='png'))
 
     plt.figure('ult use team 2 ')
     for player in range(7,13):
@@ -393,16 +392,7 @@ def use(code):
         player = str(player)
         plt.plot(ult_src[player])
         plt.plot(use[player],'v')
-
-    plt.figure('hero team 1')
-    for player in range(1,7):
-        plt.subplot(6,1,player)
-        plt.plot(hero_src[str(player)])
-
-    plt.figure('hero team 2')
-    for player in range(7,13):
-        plt.subplot(6,1,player-6)
-        plt.plot(hero_src[str(player)])
-    plt.show()
+    utils.save_fig(utils.file_path('fig_ult_use_2',0,len(ult_src['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('ult_use', use, 0, None, code)

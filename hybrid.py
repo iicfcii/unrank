@@ -22,16 +22,16 @@ STATUS_PAYLOAD_RECT = (538,71,escort.PAYLOAD_RECT_WIDTH,46)
 STATUS_THRESHOLD = 0.6
 
 def save_templates():
-    img = cv2.imread('img/numbani/numbani_1530.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_1530.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_locked.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_14670.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_14670.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_captured.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_2070.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_2070.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_point_1.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/numbani/numbani_16650.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/numbani_16650.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/hybrid_point_2.jpg', utils.crop(img, LOCKED_RECT))
 
     # cv2.imshow('img', utils.crop(img, LOCKED_RECT))
@@ -254,8 +254,6 @@ def save(start, end, code):
         obj['progress']['point'].append(progress_point)
         obj['progress']['payload'].append(progress_payload)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('obj', obj, start, end, code)
 
 def refine(code):
@@ -286,14 +284,19 @@ def refine(code):
     obj_src = utils.load_data('obj',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
+    utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
+
     plt.figure('capturing')
     plt.plot(obj['capturing'])
     plt.plot(obj_src['capturing'], '.', markersize=1)
+    utils.save_fig(utils.file_path('fig_capturing',0,len(obj['status'])-1,code,ext='png'))
+
     plt.figure('progress')
     plt.plot(obj['progress']['point'])
     plt.plot(obj['progress']['payload'])
     plt.plot(obj_src['progress']['point'], '.', markersize=1)
     plt.plot(obj_src['progress']['payload'], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_progress',0,len(obj['status'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)

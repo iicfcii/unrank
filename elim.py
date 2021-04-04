@@ -65,10 +65,10 @@ def read_rects():
 def save_templates():
     rects = read_rects()
 
-    img = cv2.imread('img/volskaya/volskaya_3060.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_3060.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/elim_1.jpg', utils.crop(img, rects[3]))
 
-    img = cv2.imread('img/volskaya/volskaya_15570.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/volskaya_15570.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/elim_7.jpg', utils.crop(img, rects[12]))
 
 def read_templates():
@@ -258,7 +258,6 @@ def save(start, end, code):
                     ])
 
         elim['data'].append(elims_frame)
-        print('Frame {:d} analyzed'.format(frame))
 
     utils.save_data('health', health, start, end, code)
     utils.save_data('elim', elim, start, end, code)
@@ -356,6 +355,7 @@ def refine(code):
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
         plt.plot(elim[str(player)],'v')
+    utils.save_fig(utils.file_path('fig_elim_1',0,len(elim['1'])-1,code,ext='png'))
 
     plt.figure('team 2')
     for player in range(7,13):
@@ -363,7 +363,8 @@ def refine(code):
         plt.plot(health[str(player)])
         plt.plot(health_src[str(player)],'.', markersize=1)
         plt.plot(elim[str(player)],'v')
-    plt.show()
+    utils.save_fig(utils.file_path('fig_elim_2',0,len(elim['1'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('health_r', health, 0, None, code)
     utils.save_data('elim_r', elim, 0, None, code)

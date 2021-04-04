@@ -26,19 +26,19 @@ PAYLOAD_MASK = np.array([
     [int(PAYLOAD_RECT[2]/2),PAYLOAD_RECT[3]-1],
     [0,PAYLOAD_RECT[3]-PAYLOAD_TILT_Y],
 ], dtype=np.int32)
-PAYLOAD_THRESHOLD = 0.6
+PAYLOAD_THRESHOLD = 0.55
 
 STATUS_RECT = (514,71,PAYLOAD_RECT_WIDTH,42)
 STATUS_THRESHOLD = 0.8
 
 def save_templates():
-    img = cv2.imread('img/rialto/rialto_10560.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_10560.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_locked.jpg', utils.crop(img, LOCKED_RECT))
 
-    img = cv2.imread('img/rialto/rialto_1530.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_1530.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_payload_2.jpg', utils.crop(img, PAYLOAD_RECT))
 
-    img = cv2.imread('img/rialto/rialto_11610.jpg', cv2.IMREAD_COLOR)
+    img = cv2.imread('template_src/rialto_11610.jpg', cv2.IMREAD_COLOR)
     cv2.imwrite('template/escort_payload_1.jpg', utils.crop(img, PAYLOAD_RECT))
 
     # cv2.imshow('img', utils.crop(img, PAYLOAD_RECT))
@@ -152,8 +152,6 @@ def save(start, end, code):
         obj['status'].append(status)
         obj['progress'].append(progress)
 
-        print('Frame {:d} analyzed'.format(frame))
-
     utils.save_data('obj', obj, start, end, code)
 
 def refine(code):
@@ -173,10 +171,12 @@ def refine(code):
     obj_src = utils.load_data('obj',0,None,code)
     plt.figure('status')
     plt.plot(obj['status'])
+    utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
 
     plt.figure('progress')
     plt.plot(obj['progress'])
     plt.plot(obj_src['progress'], '.', markersize=1)
-    plt.show()
+    utils.save_fig(utils.file_path('fig_progress',0,len(obj['status'])-1,code,ext='png'))
+    # plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)
