@@ -211,13 +211,16 @@ def read_heroes(img, rects, templates):
     return heroes
 
 def read_duplicate_hero(src, hero, rect, templates):
-    img = utils.crop(src, utils.pad_rect(rect, 5, 5))
+    img = utils.crop(src, utils.pad_rect(rect, 10, 10))
     team = 1 if rect[0] < HERO_RECT_7[0] else 2
     template, mask = templates[hero]
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED, mask=mask)
     loc = np.unravel_index(np.argmax(res), res.shape)
     img = utils.crop(img, (loc[1], loc[0],template.shape[1],template.shape[0]))
-    assert res[loc] > HERO_THRESHOLD
+
+    if res[loc] < HERO_THRESHOLD:
+        print('Not sure {} is a duplicate {}'.format(hero,res[loc]))
+        return False
 
     mean_img = np.array((
         np.mean(img[:,:,0]), # B channel

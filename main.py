@@ -14,14 +14,14 @@ def main():
         print('Replay code', code)
 
         print('Recording', id)
-        # success = capture.record(code, id)
-        #
-        # if not success:
-        #     print('Failed', id)
-        #     server.fail(replay)
-        #     return
-        #
-        # capture.screenshot(id)
+        success = capture.record(code, id)
+
+        if not success:
+            print('Failed', id)
+            server.fail(replay)
+            return
+
+        capture.screenshot(id)
         print('Processing', id)
         read.save_data(id)
         read.convert_csv(id)

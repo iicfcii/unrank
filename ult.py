@@ -358,11 +358,14 @@ def use(code):
                         return hero_data[i] == hero_data[i-1] and hero_data[i] == hero_data[i+1]
 
                     if hero.HEROES[hero_data[i-2]] == 'echo': # Duplicate effect takes about one frame
-                        # Check if echo switches hero or duplicated hero just for one frame
-                        for src, frame in utils.read_frames(i, i+1, code):
-                            duplicate_hero = hero.read_duplicate_hero(src, hero.HEROES[hero_data[i+1]], hero.read_rects()[int(player)], hero.read_templates())
-                            print('Check echo ult', player, i, duplicate_hero)
-                        if duplicate_hero: use[player][i] = 1
+                        # Check if echo duplicated hero for several frames
+                        # The duplicate hero might not be detected within 1 frame
+                        for src, frame in utils.read_frames(i, i+3, code):
+                            is_duplicate_hero = hero.read_duplicate_hero(src, hero.HEROES[hero_data[frame]], hero.read_rects()[int(player)], hero.read_templates())
+                            print('Check echo ult', player, frame, is_duplicate_hero)
+                            if is_duplicate_hero:
+                                use[player][i] = 1
+                                break
                     elif hero.HEROES[hero_data[i]] == 'dva':
                         if no_switch():
                             # Check if dva actually used bomb and not demech or mech
