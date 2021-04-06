@@ -172,11 +172,11 @@ def refine(code):
     ], type='left')
 
     obj_src = utils.load_data('obj',0,None,code)
-    plt.figure('status')
+    utils.fig('status')
     plt.plot(obj['status'])
     utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
 
-    plt.figure('progress')
+    utils.fig('progress')
     plt.plot(obj['progress'])
     plt.plot(obj_src['progress'], '.', markersize=1)
     utils.save_fig(utils.file_path('fig_progress',0,len(obj['status'])-1,code,ext='png'))

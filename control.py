@@ -445,12 +445,12 @@ def refine(code):
         map = {'a': 1, 'b': 2, 'c': 3, None: None}
         return [map[d] for d in data]
 
-    plt.figure('map')
+    utils.fig('map')
     plt.plot(map_to_int(obj['map']))
     plt.plot(map_to_int(obj_src['map']), '.', markersize=1)
     utils.save_fig(utils.file_path('fig_map',0,len(obj['map'])-1,code,ext='png'))
 
-    plt.figure('progress')
+    utils.fig('progress')
     plt.plot(obj['progress']['1'])
     plt.plot(obj['progress']['2'])
     plt.plot(obj_src['progress']['1'], '.', markersize=1)

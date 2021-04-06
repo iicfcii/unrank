@@ -317,14 +317,14 @@ def refine(code):
 
     ult_src = utils.load_data('ult',0,None,code)
 
-    plt.figure('ult team 1')
+    utils.fig('ult team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(ult[str(player)])
         plt.plot(ult_src[str(player)], '.', markersize=1)
     utils.save_fig(utils.file_path('fig_ult_1',0,len(ult['1'])-1,code,ext='png'))
 
-    plt.figure('ult team 2')
+    utils.fig('ult team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(ult[str(player)])
@@ -381,7 +381,7 @@ def use(code):
                     i += 1 # Skip next frame to avoid double counting ult drop
             i += 1
 
-    plt.figure('ult use team 1 ')
+    utils.fig('ult use team 1 ')
     for player in range(1,7):
         plt.subplot(6,1,player)
         player = str(player)
@@ -389,7 +389,7 @@ def use(code):
         plt.plot(use[player],'v')
     utils.save_fig(utils.file_path('fig_ult_use_1',0,len(ult_src['1'])-1,code,ext='png'))
 
-    plt.figure('ult use team 2 ')
+    utils.fig('ult use team 2 ')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         player = str(player)

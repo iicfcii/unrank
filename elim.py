@@ -349,7 +349,7 @@ def refine(code):
     health_src = utils.load_data('health',0,None,code)
     elim_src = utils.load_data('elim',0,None,code)
 
-    plt.figure('team 1')
+    utils.fig('team 1')
     for player in range(1,7):
         plt.subplot(6,1,player)
         plt.plot(health[str(player)])
@@ -357,7 +357,7 @@ def refine(code):
         plt.plot(elim[str(player)],'v')
     utils.save_fig(utils.file_path('fig_elim_1',0,len(elim['1'])-1,code,ext='png'))
 
-    plt.figure('team 2')
+    utils.fig('team 2')
     for player in range(7,13):
         plt.subplot(6,1,player-6)
         plt.plot(health[str(player)])

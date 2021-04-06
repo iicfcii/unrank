@@ -352,6 +352,9 @@ def load_data(type, start, end, code):
     except FileNotFoundError:
         return None
 
+def fig(name):
+    plt.figure(name, figsize=(12,9))
+
 def save_fig(file_name):
     plt.savefig(
         file_name,

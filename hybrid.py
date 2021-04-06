@@ -282,16 +282,16 @@ def refine(code):
     ], type='left')
 
     obj_src = utils.load_data('obj',0,None,code)
-    plt.figure('status')
+    utils.fig('status')
     plt.plot(obj['status'])
     utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
 
-    plt.figure('capturing')
+    utils.fig('capturing')
     plt.plot(obj['capturing'])
     plt.plot(obj_src['capturing'], '.', markersize=1)
     utils.save_fig(utils.file_path('fig_capturing',0,len(obj['status'])-1,code,ext='png'))
 
-    plt.figure('progress')
+    utils.fig('progress')
     plt.plot(obj['progress']['point'])
     plt.plot(obj['progress']['payload'])
     plt.plot(obj_src['progress']['point'], '.', markersize=1)
