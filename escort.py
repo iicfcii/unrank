@@ -157,7 +157,10 @@ def save(start, end, code):
 def refine(code):
     obj = utils.load_data('obj',0,None,code)
 
-    obj['status'] = utils.remove_outlier(obj['status'],size=3,types=['number','none','change'],interp=False)
+    # Fixed case: none num none first
+    # This could happen when some templates match black screen
+    obj['status'] = utils.remove_outlier(obj['status'],size=1,types=['number'],interp=False)
+    obj['status'] = utils.remove_outlier(obj['status'],size=3,interp=False)
     # Avoid interpolation between -1 and other value
     obj['progress'] = utils.remove_outlier(obj['progress'],size=2,min=0)
     # Fill none bewteen number and -1 with number

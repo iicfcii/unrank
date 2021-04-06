@@ -17,9 +17,13 @@ def replay(id):
 
     return replay
 
-def read():
+def read(include_processing=False):
     replayQ = leancloud.Query('Replay')
-    replayQ.equal_to('status', STAT_SUBMITTED)
+
+    statuses = [STAT_SUBMITTED]
+    if include_processing: statuses.append(STAT_PROCESSING)
+    replayQ.contained_in('status', statuses)
+
     replayQ.ascending('createdAt')
     replays = replayQ.find()
     if len(replays) == 0: return None

@@ -3,7 +3,7 @@ import capture
 import server
 
 def main():
-    replay = server.read()
+    replay = server.read(include_processing=False)
 
     if replay is None:
         print('No submitted replay')
@@ -44,3 +44,4 @@ def override(id):
     print('Finished', id)
 
 main()
+# override('606bef1368637730b73a3649')
