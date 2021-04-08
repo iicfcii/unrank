@@ -44,4 +44,3 @@ def override(id):
     print('Finished', id)
 
 main()
-# override('606bef1368637730b73a3649')

@@ -88,7 +88,7 @@ def read_status(src, templates):
 
     scores.sort(reverse=True, key=lambda m:m[2])
     score = scores[0]
-    print(scores)
+    # print(scores)
     threshold = STATUS_THRESHOLD if score[0] == -1 else PAYLOAD_THRESHOLD
     if score[2] > threshold:
         return score[0], (score[1][1],score[1][0]) # Attacking team
@@ -182,6 +182,6 @@ def refine(code):
     plt.plot(obj['progress'])
     plt.plot(obj_src['progress'], '.', markersize=1)
     utils.save_fig(utils.file_path('fig_progress',0,len(obj['status'])-1,code,ext='png'))
-    plt.show()
+    # plt.show()
 
     utils.save_data('obj_r', obj, 0, None, code)

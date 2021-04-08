@@ -9,6 +9,7 @@ ELIM_RECT_1 = (46,92,18,10)
 ELIM_RECT_7 = (860,92,18,10)
 ELIM_RECT_X_OFFSET = 71
 
+# ELIMS_RECT = (910,225,350,210) # For a scrim workshop mode
 ELIMS_RECT = (910,110,350,210)
 
 RATIO = 1.5 # Scale image to make threshold clearer
@@ -156,7 +157,7 @@ def read_elims(src, rects, templates):
                 loc[0]/RATIO,
                 loc[1]/RATIO-6, # Offset to top of elim rect
                 templates[hero].shape[1]/RATIO, # Use template width
-                28 # Height of elim rect
+                27 # Height of elim rect, 27 for scrim workshop, 28 regular
             ),dtype=np.int32)
             img_elim = utils.crop(img, rect_elim)
             team = determine_team(img_elim)
