@@ -270,9 +270,10 @@ def refine(code):
     elim = utils.load_data('elim',0,None,code)
 
     # Clean health data
-    utils.extend_none(obj['status'], [health[str(p)] for p in range(1,13)], size=0)
     for player in range(1,13):
         health[str(player)] = utils.remove_outlier(health[str(player)],size=2)
+    # Extend none later in case 1 0 1 becomes 1 0 none which cant be removed
+    utils.extend_none(obj['status'], [health[str(p)] for p in range(1,13)], size=0)
     utils.fix_disconnect(code, health, None)
 
     # Find all the deaths for each player

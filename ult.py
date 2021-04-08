@@ -355,7 +355,9 @@ def use(code):
                         # causing ult back to 0 but hero still the same
 
                         # Hero has to be the same before and after ult use
-                        return hero_data[i] == hero_data[i-1] and hero_data[i] == hero_data[i+1]
+                        # Checking a larger range may misdetect the case that one changes hero after ult?
+                        # It may be fine because death time is longer than the detection range.
+                        return np.all(np.array(hero_data[i-1:i+4]) == hero_data[i])
 
                     if hero.HEROES[hero_data[i-2]] == 'echo': # Duplicate effect takes about one frame
                         # Check if echo duplicated hero for several frames
