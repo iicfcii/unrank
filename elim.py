@@ -191,7 +191,8 @@ def read_elims(src, rects, templates):
 
         if len(heroes_row) == 1:
             h = heroes_row[0]
-            if h[1] is not None and h[2][0] > 350: # Suicide with known team
+            if h[1] is not None and h[2][0] > 330: # Hero has to be near the right edge
+                # Suicide with known team
                 elims.append([h[0:2]])
             else:
                 print('Only one hero found in this row')
