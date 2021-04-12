@@ -3,7 +3,7 @@ import capture
 import server
 
 def main():
-    replay = server.read(include_processing=False)
+    replay = server.read(include_processing=True)
 
     if replay is None:
         print('No submitted replay')

@@ -445,6 +445,11 @@ def refine(code):
         map = {'a': 1, 'b': 2, 'c': 3, None: None}
         return [map[d] for d in data]
 
+    utils.fig('status')
+    plt.plot(obj['status'])
+    plt.plot(obj_src['status'], '.', markersize=1)
+    utils.save_fig(utils.file_path('fig_status',0,len(obj['status'])-1,code,ext='png'))
+
     utils.fig('map')
     plt.plot(map_to_int(obj['map']))
     plt.plot(map_to_int(obj_src['map']), '.', markersize=1)
